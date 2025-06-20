@@ -505,7 +505,7 @@ def main():
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
             <p>As amostras foram geradas por simulação computacional seguindo um protocolo rigoroso:</p>
 
-            AAA
+            As amostras analisadas por esta ferramenta são geradas por simulação computacional a partir de dados de média e desvio padrão. Para cada parâmetro de vermicomposto (como pH, Nitrogênio Total, Fósforo Total ou Relação C/N) e para cada ponto de tempo do experimento, nossa ferramenta utiliza a média como o valor central. Essa média representa o valor típico esperado para aquele parâmetro naquele dia. Em seguida, o desvio padrão é empregado para definir a variabilidade ou o "espalhamento" das amostras individuais em torno dessa média. Um desvio padrão pequeno resulta em amostras mais próximas da média, enquanto um desvio padrão maior indica uma variação mais ampla. Utilizando um modelo matemático conhecido como distribuição normal, a ferramenta cria múltiplas "réplicas" sintéticas para cada cenário, simulando a dispersão natural dos dados em um experimento real.
             
 
     </div>
