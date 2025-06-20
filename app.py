@@ -542,7 +542,7 @@ def main():
                 As amostras analisadas por esta ferramenta são geradas por simulação computacional a partir de dados de média e desvio padrão. Para cada parâmetro de vermicomposto e para cada ponto de tempo do experimento, nossa ferramenta utiliza a <b>média</b> como o valor central e o <b>desvio padrão</b> para definir a variabilidade das amostras individuais.
             </p>
             <p>
-                Os dados são simulados utilizando uma **distribuição {distribution_type}**.
+                Os dados são simulados utilizando uma Distribuição Lognormal.
                 <ul>
                     <li><b>Distribuição Normal:</b> Assume que os dados se distribuem simetricamente em torno da média.</li>
                     <li><b>Distribuição Lognormal:</b> Frequentemente usada para dados que são estritamente positivos, assimétricos à direita e comuns em análises ambientais e biológicas. Seus logaritmos naturais seguem uma distribuição normal.</li>
