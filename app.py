@@ -496,13 +496,14 @@ def main():
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
     
-    # Explicação detalhada sobre a produção das amostras (CORRIGIDA)
+    # Explicação detalhada sobre a produção das amostras (CORREÇÃO APLICADA)
     st.markdown("""
     <div class="info-card">
-        <h3 style="display:flex;align-items:center;color:#00c1e0;">
-            <span class="info-icon">ℹ️</span> Como as amostras foram produzidas
-        </h3>
-        <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
+        <div style="display:flex; align-items:center; margin-bottom:15px;">
+            <span class="info-icon">ℹ️</span>
+            <h3 style="color:#00c1e0; margin:0;">Como as amostras foram produzidas</h3>
+        </div>
+        <div style="color:#d7dce8; line-height:1.7;">
             <p>As amostras foram geradas por simulação computacional seguindo um protocolo rigoroso:</p>
             
             <ol class="custom-list">
