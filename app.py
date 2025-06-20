@@ -314,7 +314,7 @@ def plot_parameter_evolution(ax, data, days, param_name):
     ax.set_xlabel("Dias de Vermicompostagem", fontsize=12, fontweight='bold', labelpad=15)
     ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
     ax.set_title(f"Evolução do {PARAM_MAPPING.get(param_name, param_name)}", 
-                 fontsize=14, fontweight='bold', pad=20)
+                    fontsize=14, fontweight='bold', pad=20)
     
     # Grid e estilo
     ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
@@ -503,13 +503,12 @@ def main():
             <span class="info-icon">ℹ️</span> Como as amostras foram produzidas
         </h3>
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
-            <p>As amostras foram geradas por simulação computacional seguindo um protocolo rigoroso:</p>
-
-            As amostras analisadas por esta ferramenta são geradas por simulação computacional a partir de dados de média e desvio padrão. Para cada parâmetro de vermicomposto (como pH, Nitrogênio Total, Fósforo Total ou Relação C/N) e para cada ponto de tempo do experimento, nossa ferramenta utiliza a média como o valor central. Essa média representa o valor típico esperado para aquele parâmetro naquele dia. Em seguida, o desvio padrão é empregado para definir a variabilidade ou o "espalhamento" das amostras individuais em torno dessa média. Um desvio padrão pequeno resulta em amostras mais próximas da média, enquanto um desvio padrão maior indica uma variação mais ampla. Utilizando um modelo matemático conhecido como distribuição normal, a ferramenta cria múltiplas "réplicas" sintéticas para cada cenário, simulando a dispersão natural dos dados em um experimento real.
-            
-
+            <p>
+                As amostras analisadas por esta ferramenta são geradas por simulação computacional a partir de dados de média e desvio padrão. Para cada parâmetro de vermicomposto (como pH, Nitrogênio Total, Fósforo Total ou Relação C/N) e para cada ponto de tempo do experimento, nossa ferramenta utiliza a **média** como o valor central, representando o valor típico esperado. Em seguida, o **desvio padrão** é empregado para definir a variabilidade ou o "espalhamento" das amostras individuais em torno dessa média – um desvio padrão pequeno indica pouca variação, enquanto um grande indica maior dispersão. Utilizando um modelo matemático conhecido como distribuição normal, a ferramenta cria múltiplas "réplicas" sintéticas para cada cenário, simulando a dispersão natural dos dados em um experimento real. Para garantir a plausibilidade dessas amostras geradas, aplicamos ainda regras como manter os valores de pH dentro da escala lógica (0 a 14) e assegurar que as concentrações de substâncias não sejam negativas.
+            </p>
+        </div>
     </div>
-    """, unsafe_allow_html=True) 
+    """, unsafe_allow_html=True)
     
     st.divider()
 
