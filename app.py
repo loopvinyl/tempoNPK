@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -530,7 +531,7 @@ def main():
             </p>
         </div>
     </div>
-    """, unsafe_allow_html=True) # <--- AQUI ESTÁ O st.markdown(..., unsafe_allow_html=True)
+    """, unsafe_allow_html=True) 
     
     st.divider()
 
@@ -704,3 +705,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
