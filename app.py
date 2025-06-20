@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from scipy.stats import kruskal
 import matplotlib.pyplot as plt
-import tabula
 import io
 import re
 from matplotlib.ticker import MaxNLocator
@@ -40,12 +39,6 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(100, 110, 200, 0.2);
         transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-        box-shadow: 0 12px 40px rgba(100, 110, 255, 0.15);
-        border: 1px solid rgba(100, 110, 255, 0.3);
-        transform: translateY(-2px);
     }
     
     .header-card {
@@ -87,12 +80,6 @@ st.markdown("""
         padding: 10px 15px !important;
     }
     
-    .stButton>button:hover {
-        background: rgba(40, 43, 63, 0.9) !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(100, 110, 255, 0.2);
-    }
-    
     /* Tabelas */
     .dataframe {
         background: rgba(20, 23, 40, 0.7) !important;
@@ -121,30 +108,10 @@ st.markdown("""
         background: rgba(70, 80, 150, 0.3) !important;
     }
     
-    /* Gráficos */
-    .stPlotlyChart, .stPydeckChart {
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(100, 110, 200, 0.2);
-    }
-    
     /* Divider */
     .stDivider {
         border-top: 1px solid rgba(100, 110, 200, 0.2) !important;
         margin: 30px 0;
-    }
-    
-    /* Checkbox personalizado */
-    .stCheckbox span {
-        color: #e0e5ff !important;
-        font-weight: 500;
-    }
-    
-    /* Hover effects */
-    .result-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(100, 110, 255, 0.2);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -430,9 +397,8 @@ def main():
             uploaded_file = st.file_uploader("Carregue o artigo PDF", type="pdf", key="pdf_uploader")
             if uploaded_file:
                 with st.spinner("Processando PDF..."):
-                    # Simulação de processamento (implementação real exigiria integração com tabula)
-                    st.success("Tabela extraída do PDF com sucesso!")
-                    df = load_sample_data_with_stdev()
+                    # Para simplificação, usaremos dados de exemplo
+                    st.success("Funcionalidade PDF em desenvolvimento. Usando dados de exemplo.")
             else:
                 st.info("Nenhum PDF carregado. Usando dados de exemplo.")
         
@@ -539,23 +505,30 @@ def main():
             
             # Executar teste de Kruskal-Wallis
             if len(data_by_day) >= 2:
-                h_stat, p_val = kruskal(*data_by_day)
-                results.append({
-                    "Parâmetro": PARAM_MAPPING.get(param, param),
-                    "H-Statistic": h_stat,
-                    "p-value": p_val,
-                    "Significativo (p<0.05)": p_val < 0.05
-                })
-                
-                # Plotar gráfico
-                ax = axes[i]
-                plot_parameter_evolution(ax, data_by_day, valid_days, param)
-                
-                # Adicionar resultado do teste
-                ax.annotate(f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}",
-                            xy=(0.5, 0.95), xycoords='axes fraction',
-                            ha='center', fontsize=11, color='white',
-                            bbox=dict(boxstyle="round,pad=0.3", fc="rgba(42, 47, 69, 0.8)", alpha=0.9))
+                try:
+                    h_stat, p_val = kruskal(*data_by_day)
+                    results.append({
+                        "Parâmetro": PARAM_MAPPING.get(param, param),
+                        "H-Statistic": h_stat,
+                        "p-value": p_val,
+                        "Significativo (p<0.05)": p_val < 0.05
+                    })
+                    
+                    # Plotar gráfico
+                    ax = axes[i]
+                    plot_parameter_evolution(ax, data_by_day, valid_days, param)
+                    
+                    # Adicionar resultado do teste (CORREÇÃO DO ERRO)
+                    ax.annotate(f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}",
+                                xy=(0.5, 0.95), xycoords='axes fraction',
+                                ha='center', fontsize=11, color='white',
+                                bbox=dict(
+                                    boxstyle="round,pad=0.3", 
+                                    facecolor=(42/255, 47/255, 69/255, 0.8),
+                                    edgecolor='none'
+                                ))
+                except Exception as e:
+                    st.error(f"Erro ao processar {param}: {str(e)}")
             else:
                 st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
     else:
