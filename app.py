@@ -3,10 +3,8 @@ import pandas as pd
 import numpy as np
 from scipy.stats import kruskal
 import matplotlib.pyplot as plt
-import io
-import re
-from matplotlib.ticker import MaxNLocator
 import matplotlib as mpl
+from matplotlib.ticker import MaxNLocator
 
 # Configurações gerais com tema escuro
 st.set_page_config(
@@ -32,13 +30,11 @@ st.markdown("""
     
     .card {
         background: rgba(20, 23, 40, 0.7) !important;
-        backdrop-filter: blur(10px);
         border-radius: 16px;
         padding: 24px;
         margin-bottom: 28px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(100, 110, 200, 0.2);
-        transition: all 0.3s ease;
     }
     
     .header-card {
@@ -53,7 +49,6 @@ st.markdown("""
         padding: 20px;
         border-radius: 0 12px 12px 0;
         margin-bottom: 20px;
-        transition: all 0.3s ease;
     }
     
     .signif-card {
@@ -68,16 +63,14 @@ st.markdown("""
     h1, h2, h3, h4, h5, h6 {
         color: #e0e5ff !important;
         font-weight: 600;
-        letter-spacing: 0.5px;
     }
     
     /* Widgets */
-    .st-bb, .st-at, .st-ae, .st-af, .stButton>button, .stTextInput>div>div>input {
+    .stButton>button {
         background: rgba(26, 29, 43, 0.8) !important;
         color: white !important;
         border: 1px solid rgba(100, 110, 200, 0.3) !important;
         border-radius: 12px !important;
-        padding: 10px 15px !important;
     }
     
     /* Tabelas */
@@ -85,19 +78,12 @@ st.markdown("""
         background: rgba(20, 23, 40, 0.7) !important;
         color: white !important;
         border-radius: 12px;
-        overflow: hidden;
     }
     
     .dataframe th {
         background: rgba(70, 80, 150, 0.4) !important;
         color: #e0e5ff !important;
         font-weight: 600;
-        padding: 12px 15px !important;
-    }
-    
-    .dataframe td {
-        padding: 10px 15px !important;
-        border-bottom: 1px solid rgba(100, 110, 200, 0.1) !important;
     }
     
     .dataframe tr:nth-child(even) {
@@ -285,7 +271,7 @@ def plot_parameter_evolution(ax, data, days, param_name):
     
     # Grid e estilo
     ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-    ax.legend(loc='best', fontsize=10, framealpha=0.25, fancybox=True)
+    ax.legend(loc='best', fontsize=10, framealpha=0.25)
     
     # Remover bordas
     for spine in ax.spines.values():
@@ -293,7 +279,6 @@ def plot_parameter_evolution(ax, data, days, param_name):
     
     # Fundo gradiente
     ax.set_facecolor('#0c0f1d')
-    ax.set_alpha(0.9)
     
     return ax
 
@@ -396,9 +381,7 @@ def main():
         if not use_sample:
             uploaded_file = st.file_uploader("Carregue o artigo PDF", type="pdf", key="pdf_uploader")
             if uploaded_file:
-                with st.spinner("Processando PDF..."):
-                    # Para simplificação, usaremos dados de exemplo
-                    st.success("Funcionalidade PDF em desenvolvimento. Usando dados de exemplo.")
+                st.success("Funcionalidade PDF em desenvolvimento. Usando dados de exemplo.")
             else:
                 st.info("Nenhum PDF carregado. Usando dados de exemplo.")
         
@@ -518,19 +501,29 @@ def main():
                     ax = axes[i]
                     plot_parameter_evolution(ax, data_by_day, valid_days, param)
                     
-                    # Adicionar resultado do teste (CORREÇÃO DO ERRO)
-                    ax.annotate(f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}",
-                                xy=(0.5, 0.95), xycoords='axes fraction',
-                                ha='center', fontsize=11, color='white',
-                                bbox=dict(
-                                    boxstyle="round,pad=0.3", 
-                                    facecolor=(42/255, 47/255, 69/255, 0.8),
-                                    edgecolor='none'
-                                ))
+                    # Adicionar resultado do teste (SOLUÇÃO DEFINITIVA PARA O ERRO)
+                    annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
+                    ax.text(
+                        0.5, 0.95, 
+                        annotation_text,
+                        transform=ax.transAxes,
+                        ha='center',
+                        va='top',
+                        fontsize=11,
+                        color='white',
+                        bbox=dict(
+                            boxstyle="round,pad=0.3",
+                            facecolor='#2a2f45',  # Cor hexadecimal
+                            alpha=0.8,
+                            edgecolor='none'
+                        )
+                    )
                 except Exception as e:
                     st.error(f"Erro ao processar {param}: {str(e)}")
+                    continue
             else:
                 st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
+                continue
     else:
         st.warning("Nenhum parâmetro selecionado para análise.")
         return
@@ -571,19 +564,20 @@ def main():
         st.info("Nenhum resultado estatístico disponível.")
     
     # Gráficos
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                📊 Evolução Temporal dos Parâmetros
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    plt.tight_layout()
-    st.pyplot(fig)
-    plt.close(fig)
+    if num_plots > 0:
+        st.markdown("""
+        <div class="card">
+            <h2 style="display:flex;align-items:center;gap:10px;">
+                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                    📊 Evolução Temporal dos Parâmetros
+                </span>
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close(fig)
     
     # Interpretação
     display_results_interpretation(results)
