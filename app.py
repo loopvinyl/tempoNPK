@@ -59,6 +59,14 @@ st.markdown("""
         border-left: 4px solid #ff5252 !important;
     }
     
+    .reference-card {
+        background: rgba(20, 23, 40, 0.9) !important;
+        border-left: 4px solid #00c1e0;
+        padding: 20px;
+        border-radius: 0 12px 12px 0;
+        margin-top: 40px;
+    }
+    
     /* Títulos */
     h1, h2, h3, h4, h5, h6 {
         color: #e0e5ff !important;
@@ -98,6 +106,12 @@ st.markdown("""
     .stDivider {
         border-top: 1px solid rgba(100, 110, 200, 0.2) !important;
         margin: 30px 0;
+    }
+    
+    /* Espaçamento entre gráficos */
+    .graph-spacer {
+        height: 40px;
+        background: transparent;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -466,12 +480,16 @@ def main():
     num_plots = len(selected_params)
     
     if num_plots > 0:
-        fig, axes = plt.subplots(
-            num_plots, 1, 
-            figsize=(10, 5 * num_plots),
-            squeeze=False
-        )
-        axes = axes.flatten()
+        # Criar figura com espaço adicional entre os subplots
+        fig = plt.figure(figsize=(10, 6 * num_plots))
+        
+        # Usar GridSpec para controlar o espaçamento
+        gs = fig.add_gridspec(num_plots, 1, hspace=0.5)  # Espaço vertical entre gráficos
+        
+        axes = []
+        for i in range(num_plots):
+            ax = fig.add_subplot(gs[i])
+            axes.append(ax)
     
         for i, param in enumerate(selected_original_params):
             param_df = df[df['Parameter'] == param]
@@ -501,7 +519,7 @@ def main():
                     ax = axes[i]
                     plot_parameter_evolution(ax, data_by_day, valid_days, param)
                     
-                    # Adicionar resultado do teste (SOLUÇÃO DEFINITIVA PARA O ERRO)
+                    # Adicionar resultado do teste
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
                     ax.text(
                         0.5, 0.95, 
@@ -513,7 +531,7 @@ def main():
                         color='white',
                         bbox=dict(
                             boxstyle="round,pad=0.3",
-                            facecolor='#2a2f45',  # Cor hexadecimal
+                            facecolor='#2a2f45',
                             alpha=0.8,
                             edgecolor='none'
                         )
@@ -575,12 +593,44 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
+        # Adicionar espaçamento visual entre os gráficos
+        st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True)
+        
+        # Ajustar layout com espaço adicional
         plt.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
     
     # Interpretação
     display_results_interpretation(results)
+    
+    # Referência Bibliográfica (Formato ABNT)
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                📚 Referência Bibliográfica
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="reference-card">
+        <p style="line-height:1.8; text-align:justify;">
+            DERMENDZHIEVA, D.; WRBKA, T.; KÜHBACHER, T. M.; et al. 
+            Vermicomposting of different organic materials using the earthworm species Eisenia fetida. 
+            <strong>Environmental Science and Pollution Research</strong>, 
+            v. 28, p. 12372–12389, 2021. 
+            Disponível em: https://doi.org/10.1007/s11356-020-11285-y. 
+            Acesso em: 21 jun. 2023.
+        </p>
+        <p style="margin-top:20px; font-style:italic;">
+            Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. 
+            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
