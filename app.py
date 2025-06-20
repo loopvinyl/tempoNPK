@@ -8,130 +8,303 @@ from matplotlib.ticker import MaxNLocator
 
 # Configurações gerais com tema escuro
 st.set_page_config(
-    page_title="Análise de Metais Pesados em Alface", 
+    page_title="Análise Estatística de Vermicompostagem", 
     layout="wide",
-    page_icon="🌱"
+    page_icon="📊"
 )
 
 # CSS para tema escuro premium
 st.markdown("""
 <style>
-    /* [Manter todo o CSS original] */
+    /* Configurações gerais */
+    body {
+        color: #f0f2f6;
+        background-color: #0e1117;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Containers e cards */
+    .stApp {
+        background: linear-gradient(135deg, #0c0f1d 0%, #131625 100%);
+    }
+    
+    .card {
+        background: rgba(20, 23, 40, 0.7) !important;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(100, 110, 200, 0.2);
+    }
+    
+    .header-card {
+        background: linear-gradient(135deg, #2a2f45 0%, #1a1d2b 100%);
+        border-left: 4px solid #6f42c1;
+        padding: 20px 30px;
+    }
+    
+    .info-card {
+        background: rgba(26, 29, 50, 0.8) !important;
+        border-left: 4px solid #00c1e0;
+        padding: 20px;
+        border-radius: 0 12px 12px 0;
+        margin-top: 15px;
+    }
+    
+    .result-card {
+        background: rgba(26, 29, 43, 0.9);
+        border-left: 4px solid #6f42c1;
+        padding: 20px;
+        border-radius: 0 12px 12px 0;
+        margin-bottom: 20px;
+    }
+    
+    .signif-card {
+        border-left: 4px solid #00c853 !important;
+    }
+    
+    .not-signif-card {
+        border-left: 4:px solid #ff5252 !important;
+    }
+    
+    .reference-card {
+        background: rgba(20, 23, 40, 0.9) !important;
+        border-left: 4px solid #00c1e0;
+        padding: 20px;
+        border-radius: 0 12px 12px 0;
+        margin-top: 40px;
+    }
+    
+    /* Títulos */
+    h1, h2, h3, h4, h5, h6 {
+        color: #e0e5ff !important;
+        font-weight: 600;
+    }
+    
+    /* Widgets */
+    .stButton>button {
+        background: rgba(26, 29, 43, 0.8) !important;
+        color: white !important;
+        border: 1px solid rgba(100, 110, 200, 0.3) !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Tabelas */
+    .dataframe {
+        background: rgba(20, 23, 40, 0.7) !important;
+        color: white !important;
+        border-radius: 12px;
+    }
+    
+    .dataframe th {
+        background: rgba(70, 80, 150, 0.4) !important;
+        color: #e0e5ff !important;
+        font-weight: 600;
+    }
+    
+    .dataframe tr:nth-child(even) {
+        background: rgba(30, 33, 50, 0.5) !important;
+    }
+    
+    .dataframe tr:hover {
+        background: rgba(70, 80, 150, 0.3) !important;
+    }
+    
+    /* Divider */
+    .stDivider {
+        border-top: 1px solid rgba(100, 110, 200, 0.2) !important;
+        margin: 30px 0;
+    }
+    
+    /* Espaçamento entre gráficos */
+    .graph-spacer {
+        height: 40px;
+        background: transparent;
+    }
+    
+    /* Ícones informativos */
+    .info-icon {
+        font-size: 1.2rem;
+        margin-right: 10px;
+        color: #00c1e0;
+    }
+    
+    /* Listas formatadas */
+    .custom-list li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+    
+    .custom-list ul {
+        padding-left: 25px;
+        margin-top: 8px;
+    }
+    
+    .custom-list code {
+        background: rgba(100, 110, 200, 0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+# Configurar matplotlib para tema escuro premium
+plt.style.use('dark_background')
+mpl.rcParams.update({
+    'axes.facecolor': '#131625',
+    'figure.facecolor': '#0c0f1d',
+    'axes.edgecolor': '#6f42c1',
+    'axes.labelcolor': '#e0e5ff',
+    'text.color': '#e0e5ff',
+    'xtick.color': '#a0a7c0',
+    'ytick.color': '#a0a7c0',
+    'grid.color': '#2a2f45',
+    'grid.alpha': 0.4,
+    'font.family': 'Segoe UI',
+    'axes.titleweight': '600',
+    'axes.titlesize': 14,
+})
 
 # Título com estilo moderno
 st.markdown("""
 <div class="header-card">
     <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
-        🌱 Análise de Metais Pesados em Alface (Jordão et al., 2007)
+        📊 Análise Estatística de Parâmetros de Vermicomposto
     </h1>
     <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
-    Concentrações de Cu, Ni e Zn em função de doses de vermicomposto
+    Aplicação para análise de diferenças significativas em parâmetros de vermicomposto ao longo do tempo
     </p>
 </div>
 """, unsafe_allow_html=True)
 
 ## Mapeamento de parâmetros para nomes amigáveis
 PARAM_MAPPING = {
-    "Cu in leaves (mg/kg)": "Concentração de Cu nas Folhas",
-    "Cu in roots (mg/kg)": "Concentração de Cu nas Raízes",
-    "Ni in leaves (mg/kg)": "Concentração de Ni nas Folhas",
-    "Ni in roots (mg/kg)": "Concentração de Ni nas Raízes",
-    "Zn in leaves (mg/kg)": "Concentração de Zn nas Folhas",
-    "Zn in roots (mg/kg)": "Concentração de Zn nas Raízes"
+    "TKN (g/kg)": "Nitrogênio Total (N)",
+    "Total P (g/kg)": "Fósforo Total (P)",
+    "TK (g/kg)": "Potássio Total (K)",
+    "pH (H₂O)": "pH",
+    "C/N ratio": "Relação C/N"
 }
 
-## Mapeamento de doses
-DOSE_MAPPING = {
-    'Dose 25': 25,
-    'Dose 50': 50,
-    'Dose 65': 65,
-    'Dose 80': 80
-}
-
-## Equações de regressão da Tabela 6
-REGRESSION_EQUATIONS = {
-    "Natural": {
-        "Cu in leaves (mg/kg)": lambda x: 2.8,
-        "Cu in roots (mg/kg)": lambda x: 10.9,
-        "Ni in leaves (mg/kg)": lambda x: 2.1,
-        "Ni in roots (mg/kg)": lambda x: 5.8,
-        "Zn in leaves (mg/kg)": lambda x: 47.79,
-        "Zn in roots (mg/kg)": lambda x: 60.6
-    },
-    "Enriquecido com Cu": {
-        "Cu in leaves (mg/kg)": lambda x: 2.6 + 0.1253*x - 0.000716*x**2,
-        "Cu in roots (mg/kg)": lambda x: 14.1 + 2.9027*x,
-        "Ni in leaves (mg/kg)": lambda x: 1.3,
-        "Ni in roots (mg/kg)": lambda x: 8.3,
-        "Zn in leaves (mg/kg)": lambda x: 49.26,
-        "Zn in roots (mg/kg)": lambda x: 58.8
-    },
-    "Enriquecido com Ni": {
-        "Cu in leaves (mg/kg)": lambda x: 2.2 + 0.0165*x,
-        "Cu in roots (mg/kg)": lambda x: 10.5,
-        "Ni in leaves (mg/kg)": lambda x: 1.2 + 0.7168*x - 0.00377*x**2,
-        "Ni in roots (mg/kg)": lambda x: 53.8 + 17.3756*x - 0.14137*x**2,
-        "Zn in leaves (mg/kg)": lambda x: 42.93,
-        "Zn in roots (mg/kg)": lambda x: 60.88
-    },
-    "Enriquecido com Zn": {
-        "Cu in leaves (mg/kg)": lambda x: 2.2 + 0.0967*x - 0.00104*x**2,
-        "Cu in roots (mg/kg)": lambda x: 12.9,
-        "Ni in leaves (mg/kg)": lambda x: 2.0,
-        "Ni in roots (mg/kg)": lambda x: 10.9,
-        "Zn in leaves (mg/kg)": lambda x: -24.0 + 29.4827*x - 0.2068*x**2,
-        "Zn in roots (mg/kg)": lambda x: 162.93 + 6.9758*x + 0.09659*x**2
-    }
-}
-
-## Desvios padrão estimados com base no artigo
-STDEV_ESTIMATES = {
-    "Cu in leaves (mg/kg)": 0.5,
-    "Cu in roots (mg/kg)": 15.0,
-    "Ni in leaves (mg/kg)": 0.3,
-    "Ni in roots (mg/kg)": 20.0,
-    "Zn in leaves (mg/kg)": 5.0,
-    "Zn in roots (mg/kg)": 30.0
+## Mapeamento de dias para ordenação numérica
+DAY_MAPPING = {
+    'Day 1': 1,
+    'Day 30': 30,
+    'Day 60': 60,
+    'Day 90': 90,
+    'Day 120': 120
 }
 
 ## Função para Carregar Dados de Exemplo
 @st.cache_data
-def load_sample_data(vermicompost_type):
-    doses = [25, 50, 65, 80]
-    num_replications = 3
-    all_data = []
-    
-    for param_name in PARAM_MAPPING.keys():
-        for _ in range(num_replications):
-            row = {'Parameter': param_name, 'Vermicompost Type': vermicompost_type}
-            for dose in doses:
-                # Calcular valor baseado na equação de regressão
-                base_value = REGRESSION_EQUATIONS[vermicompost_type][param_name](dose)
-                
-                # Adicionar variação aleatória baseada no desvio padrão estimado
-                stdev = STDEV_ESTIMATES[param_name]
-                simulated_value = np.random.normal(loc=base_value, scale=stdev)
-                
-                # Garantir valores não negativos
-                row[f'Dose {dose}'] = max(0.0, simulated_value)
-                
-            all_data.append(row)
-    
-    return pd.DataFrame(all_data)
+def load_sample_data_with_stdev(distribution_type='Normal'):
+    sample_param_data = {
+        'TKN (g/kg)': {
+            'Day 1': {'mean': 20.8, 'stdev': 0.5},
+            'Day 30': {'mean': 21.5, 'stdev': 0.6},
+            'Day 60': {'mean': 22.2, 'stdev': 0.7},
+            'Day 90': {'mean': 23.0, 'stdev': 0.8},
+            'Day 120': {'mean': 24.5, 'stdev': 0.9}
+        },
+        'Total P (g/kg)': {
+            'Day 1': {'mean': 12.1, 'stdev': 0.3},
+            'Day 30': {'mean': 12.8, 'stdev': 0.4},
+            'Day 60': {'mean': 13.5, 'stdev': 0.4},
+            'Day 90': {'mean': 14.2, 'stdev': 0.5},
+            'Day 120': {'mean': 15.0, 'stdev': 0.6}
+        },
+        'TK (g/kg)': {
+            'Day 1': {'mean': 1.28, 'stdev': 0.02},
+            'Day 30': {'mean': 1.29, 'stdev': 0.02},
+            'Day 60': {'mean': 1.30, 'stdev': 0.02},
+            'Day 90': {'mean': 1.31, 'stdev': 0.02},
+            'Day 120': {'mean': 1.32, 'stdev': 0.02}
+        },
+        'pH (H₂O)': {
+            'Day 1': {'mean': 7.04, 'stdev': 0.05},
+            'Day 30': {'mean': 7.00, 'stdev': 0.05},
+            'Day 60': {'mean': 6.95, 'stdev': 0.05},
+            'Day 90': {'mean': 6.90, 'stdev': 0.05},
+            'Day 120': {'mean': 6.85, 'stdev': 0.05}
+        },
+        'C/N ratio': {
+            'Day 1': {'mean': 11.2, 'stdev': 0.2},
+            'Day 30': {'mean': 10.9, 'stdev': 0.25},
+            'Day 60': {'mean': 10.5, 'stdev': 0.3},
+            'Day 90': {'mean': 10.0, 'stdev': 0.35},
+            'Day 120': {'mean': 9.5, 'stdev': 0.4}
+        }
+    }
 
-## Função para plotar evolução das concentrações
-def plot_parameter_evolution(ax, data, doses, param_name):
+    num_replications = 3
+    days = ['Day 1', 'Day 30', 'Day 60', 'Day 90', 'Day 120']
+    all_replicated_data = []
+
+    for param_name, daily_stats in sample_param_data.items():
+        for _ in range(num_replications):
+            row_data = {'Parameter': param_name, 'Substrate': 'VC-M'}
+            for day in days:
+                stats = daily_stats.get(day)
+                if stats:
+                    # Ajuste: Gerar dados com base na distribuição selecionada
+                    if distribution_type == 'Normal':
+                        simulated_value = np.random.normal(
+                            loc=stats['mean'], 
+                            scale=stats['stdev']
+                        )
+                    elif distribution_type == 'LogNormal':
+                        # Para lognormal, a média e o desvio padrão da distribuição
+                        # normal subjacente (log-mu e log-sigma) precisam ser calculados
+                        # a partir da média e do desvio padrão originais.
+                        # Referência: https://blogs.sas.com/content/iml/2014/06/09/simulate-lognormal-data-with-specific-mean-and-variance.html
+                        mu = stats['mean']
+                        sigma = stats['stdev']
+                        # Garantir que sigma não é zero para evitar divisão por zero no cálculo
+                        if sigma <= 0:
+                            log_sigma = 0
+                            log_mu = np.log(mu)
+                        else:
+                            log_sigma = np.sqrt(np.log(1 + (sigma/mu)**2))
+                            log_mu = np.log(mu) - 0.5 * log_sigma**2
+                        
+                        simulated_value = np.random.lognormal(
+                            mean=log_mu,
+                            sigma=log_sigma
+                        )
+                    else: # Default para Normal, caso um tipo desconhecido seja passado
+                        simulated_value = np.random.normal(
+                            loc=stats['mean'], 
+                            scale=stats['stdev']
+                        )
+                        
+                    # Aplicar clipping e garantia de valores não negativos para pH e concentrações
+                    if param_name == 'pH (H₂O)':
+                        simulated_value = np.clip(simulated_value, 0.0, 14.0)
+                    elif 'g/kg' in param_name or 'ratio' in param_name:
+                        simulated_value = max(0.0, simulated_value)
+                    
+                    row_data[day] = simulated_value
+                else:
+                    row_data[day] = np.nan
+            all_replicated_data.append(row_data)
+
+    return pd.DataFrame(all_replicated_data)
+
+## Função para plotar evolução temporal com estilo moderno
+def plot_parameter_evolution(ax, data, days, param_name):
+    # Converter dias para numérico para ordenação
+    numeric_days = [DAY_MAPPING[d] for d in days]
+    
     # Paleta de cores moderna
     colors = ['#6f42c1', '#00c1e0', '#00d4b1', '#ffd166', '#ff6b6b']
     
-    for i, dose in enumerate(doses):
+    for i, (day, num_day) in enumerate(zip(days, numeric_days)):
         group_data = data[i]
         
-        # Plotar pontos individuais
+        # Plotar pontos individuais com efeito de profundidade
         ax.scatter(
-            [dose] * len(group_data), 
+            [num_day] * len(group_data), 
             group_data, 
             alpha=0.85, 
             s=100,
@@ -139,14 +312,14 @@ def plot_parameter_evolution(ax, data, doses, param_name):
             edgecolors='white',
             linewidth=1.2,
             zorder=3,
-            label=f"{dose} t ha⁻¹",
+            label=f"{day.replace('Day ', 'Dia ')}",
             marker='o'
         )
     
-    # Calcular e plotar medianas
+    # Calcular e plotar medianas com estilo premium
     medians = [np.median(group) for group in data]
     ax.plot(
-        doses, 
+        numeric_days, 
         medians, 
         'D-', 
         markersize=10,
@@ -159,19 +332,20 @@ def plot_parameter_evolution(ax, data, doses, param_name):
         alpha=0.95
     )
     
-    # Configurar eixo X
-    ax.set_xticks(doses)
-    ax.set_xticklabels([str(d) for d in doses], fontsize=11)
+    # Configurar eixo X com dias numéricos
+    ax.set_xticks(numeric_days)
+    ax.set_xticklabels([d.replace('Day ', '') for d in days], fontsize=11)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     
     # Melhorar formatação
-    ax.set_xlabel("Dose de Vermicomposto (t ha⁻¹)", fontsize=12, fontweight='bold', labelpad=15)
+    ax.set_xlabel("Dias de Vermicompostagem", fontsize=12, fontweight='bold', labelpad=15)
     ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
-    ax.set_title(f"Evolução da {PARAM_MAPPING.get(param_name, param_name)}", 
-                    fontsize=14, fontweight='bold', pad=20)
+    ax.set_title(f"Evolução do {PARAM_MAPPING.get(param_name, param_name)}", 
+                         fontsize=14, fontweight='bold', pad=20)
     
     # Grid e estilo
     ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-    ax.legend(loc='best', fontsize=10, framealpha=0.25, title="Doses")
+    ax.legend(loc='best', fontsize=10, framealpha=0.25)
     
     # Remover bordas
     for spine in ax.spines.values():
@@ -184,138 +358,247 @@ def plot_parameter_evolution(ax, data, doses, param_name):
 
 ## Função para exibir resultados com design premium
 def display_results_interpretation(results):
-    # [Manter função idêntica ao original]
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                📝 Interpretação dos Resultados
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if not results:
+        st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
+        return
+    
+    for res in results:
+        param_name = res["Parâmetro"]
+        p_val = res["p-value"]
+        is_significant = p_val < 0.05
+        
+        card_class = "signif-card" if is_significant else "not-signif-card"
+        icon = "✅" if is_significant else "❌"
+        title_color = "#00c853" if is_significant else "#ff5252"
+        status = "Significativo" if is_significant else "Não Significativo"
+        
+        st.markdown(f"""
+        <div class="result-card {card_class}">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="font-size:28px; color:{title_color};">{icon}</div>
+                    <h3 style="margin:0; color:{title_color}; font-weight:600;">{param_name}</h3>
+                </div>
+                <div style="background:rgba(42, 47, 69, 0.7); padding:8px 18px; border-radius:30px; border:1px solid {title_color}30;">
+                    <span style="font-weight:bold; font-size:1.1rem; color:{title_color};">{status}</span>
+                    <span style="color:#a0a7c0; margin-left:8px;">p = {p_val:.4f}</span>
+                </div>
+            </div>
+            <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
+        """, unsafe_allow_html=True)
+        
+        if is_significant:
+            st.markdown("""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        <b>Rejeitamos a hipótese nula (H₀)</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        Há evidências de que os valores do parâmetro mudam significativamente ao longo do tempo
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        A vermicompostagem afeta este parâmetro
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        <b>Aceitamos a hipótese nula (H₀)</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        Não há evidências suficientes de mudanças significativas
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        O parâmetro permanece estável durante o processo de vermicompostagem
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 ## Função Principal
 def main():
-    # Inicialização de variáveis
-    vermicompost_types = list(REGRESSION_EQUATIONS.keys())
-    default_type = vermicompost_types[0]
-    
     # Sidebar premium
     with st.sidebar:
         st.markdown("""
         <div class="card">
             <h3 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    📂 Configuração do Vermicomposto
+                    📂 Opções de Dados
                 </span>
             </h3>
         """, unsafe_allow_html=True)
         
-        selected_type = st.selectbox(
-            "Tipo de Vermicomposto:",
-            options=vermicompost_types,
+        use_sample = st.checkbox("Usar dados de exemplo", value=True, key="use_sample")
+        
+        distribution_type = st.radio(
+            "Tipo de distribuição para simulação:",
+            ('Normal', 'LogNormal'),
             index=0,
-            key="vermicompost_type"
+            key="dist_type_select",
+            help="Escolha o tipo de distribuição para gerar os dados simulados. LogNormal é frequentemente mais adequado para dados ambientais que não são simétricos e têm um limite inferior de zero."
         )
+
+        # Recarregar dados com base na escolha da distribuição
+        df = load_sample_data_with_stdev(distribution_type)
+        
+        if not use_sample:
+            uploaded_file = st.file_uploader("Carregue o artigo PDF", type="pdf", key="pdf_uploader")
+            if uploaded_file:
+                st.success("Funcionalidade PDF em desenvolvimento. Usando dados de exemplo.")
+            else:
+                st.info("Nenhum PDF carregado. Usando dados de exemplo.")
         
         st.markdown("""
         <div class="card">
             <h3 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    ⚙️ Parâmetros de Análise
+                    ⚙️ Configuração de Análise
                 </span>
             </h3>
         """, unsafe_allow_html=True)
         
-        param_options = list(PARAM_MAPPING.values())
+        unique_params = df['Parameter'].unique()
+        param_options = [PARAM_MAPPING.get(p, p) for p in unique_params]
+        
         selected_params = st.multiselect(
             "Selecione os parâmetros:",
             options=param_options,
-            default=param_options[:2],
+            default=param_options,
             key="param_select"
         )
+        
+        st.markdown("</div>", unsafe_allow_html=True)
         
         st.markdown("""
         <div class="card">
             <h3 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    📚 Contexto Científico
+                    📚 Metodologia Estatística
                 </span>
             </h3>
             <div style="color:#d7dce8; line-height:1.7;">
-                <p>Estudo analisa a absorção de metais pesados (Cu, Ni, Zn) pela alface cultivada em solos com vermicomposto:</p>
+                <p><b>Teste de Kruskal-Wallis</b></p>
                 <ul style="padding-left:20px;">
-                    <li>Vermicomposto natural e enriquecido com metais</li>
-                    <li>4 doses de aplicação (25-80 t ha⁻¹)</li>
-                    <li>Avaliação em folhas e raízes</li>
-                    <li>Baseado em Jordão et al. (2007)</li>
+                    <li>Alternativa não paramétrica à ANOVA</li>
+                    <li>Compara medianas de múltiplos grupos</li>
+                    <li>Hipóteses:
+                        <ul>
+                            <li>H₀: Distribuições idênticas</li>
+                            <li>H₁: Pelo menos uma distribuição diferente</li>
+                        </ul>
+                    </li>
+                    <li>Interpretação:
+                        <ul>
+                            <li>p &lt; 0.05: Diferenças significativas</li>
+                            <li>p ≥ 0.05: Sem evidência de diferenças</li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Carregar dados
-    df = load_sample_data(selected_type)
-    
-    # Pré-visualização dos Dados
+    # Pré-visualização dos Dados (TODAS AS AMOSTRAS)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
             <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                🔍 Dados Simulados (Baseados em Jordão et al., 2007)
+                🔍 Pré-visualização Completa dos Dados
             </span>
         </h2>
     </div>
     """, unsafe_allow_html=True)
     
     st.dataframe(df)
-    st.markdown(f"**Tipo de Vermicomposto:** {selected_type} | **Total de amostras:** {len(df)}")
+    st.markdown(f"**Total de amostras:** {len(df)}")
     
-    # Explicação sobre simulação de dados
-    st.markdown("""
+    # Explicação detalhada sobre a produção das amostras (CORRIGIDA E ADAPTADA)
+    st.markdown(f"""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
-            <span class="info-icon">ℹ️</span> Metodologia de Simulação de Dados
+            <span class="info-icon">ℹ️</span> Como as amostras foram produzidas
         </h3>
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
-            <p>Os dados foram simulados com base nas equações de regressão publicadas por Jordão et al. (2007):</p>
-            <ol>
-                <li>Utilização das equações da Tabela 6 para calcular valores médios</li>
-                <li>Adição de variação aleatória baseada em desvios padrão estimados</li>
-                <li>Geração de 3 réplicas por tratamento</li>
-                <li>Valores negativos convertidos para zero</li>
-            </ol>
-            <p><b>Equação exemplo (Cu nas folhas - Vermicomposto com Cu):</b><br>
-            Y = 2.6 + 0.1253*X - 0.000716*X²</p>
+            <p>
+                As amostras analisadas por esta ferramenta são geradas por simulação computacional a partir de dados de média e desvio padrão. Para cada parâmetro de vermicomposto e para cada ponto de tempo do experimento, nossa ferramenta utiliza a <b>média</b> como o valor central e o <b>desvio padrão</b> para definir a variabilidade das amostras individuais.
+            </p>
+            <p>
+                Os dados são simulados utilizando uma **distribuição {distribution_type}**.
+                <ul>
+                    <li><b>Distribuição Normal:</b> Assume que os dados se distribuem simetricamente em torno da média.</li>
+                    <li><b>Distribuição Lognormal:</b> Frequentemente usada para dados que são estritamente positivos, assimétricos à direita e comuns em análises ambientais e biológicas. Seus logaritmos naturais seguem uma distribuição normal.</li>
+                </ul>
+                Aplicamos regras para garantir que os valores simulados de pH permaneçam dentro da escala lógica (0 a 14) e que as concentrações de substâncias não sejam negativas, tornando as amostras mais realistas para dados de vermicompostagem.
+            </p>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     st.divider()
 
-    # Converter parâmetros selecionados para nomes originais
+    # Realizar Análise
+    if not selected_params:
+        st.warning("Selecione pelo menos um parâmetro para análise.")
+        return
+
+    # Converter de volta para nomes originais
     reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
-    selected_original_params = [reverse_mapping[p] for p in selected_params]
+    selected_original_params = [reverse_mapping.get(p, p) for p in selected_params]
     
-    # Realizar Análise Estatística
     results = []
-    doses = [25, 50, 65, 80]
-    dose_columns = [f'Dose {d}' for d in doses]
+    days_ordered = ['Day 1', 'Day 30', 'Day 60', 'Day 90', 'Day 120']
     
     # Configurar subplots
-    num_plots = len(selected_original_params)
+    num_plots = len(selected_params)
+    
     if num_plots > 0:
+        # Criar figura com espaço adicional entre os subplots
         fig = plt.figure(figsize=(10, 6 * num_plots))
-        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)
-        axes = [fig.add_subplot(gs[i]) for i in range(num_plots)]
         
+        # Usar GridSpec para controlar o espaçamento
+        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)  # Espaço vertical entre gráficos
+        
+        axes = []
+        for i in range(num_plots):
+            ax = fig.add_subplot(gs[i])
+            axes.append(ax)
+    
         for i, param in enumerate(selected_original_params):
             param_df = df[df['Parameter'] == param]
             
-            # Coletar dados por dose
-            data_by_dose = []
-            for dose_col in dose_columns:
-                if dose_col in param_df.columns:
-                    dose_data = param_df[dose_col].dropna().values
-                    if len(dose_data) > 0:
-                        data_by_dose.append(dose_data)
+            # Coletar dados por dia
+            data_by_day = []
+            valid_days = []
+            for day in days_ordered:
+                if day in param_df.columns:
+                    day_data = param_df[day].dropna().values
+                    if len(day_data) > 0:
+                        data_by_day.append(day_data)
+                        valid_days.append(day)
             
             # Executar teste de Kruskal-Wallis
-            if len(data_by_dose) >= 2:
+            if len(data_by_day) >= 2:
                 try:
-                    h_stat, p_val = kruskal(*data_by_dose)
+                    h_stat, p_val = kruskal(*data_by_day)
                     results.append({
                         "Parâmetro": PARAM_MAPPING.get(param, param),
                         "H-Statistic": h_stat,
@@ -325,7 +608,7 @@ def main():
                     
                     # Plotar gráfico
                     ax = axes[i]
-                    plot_parameter_evolution(ax, data_by_dose, doses, param)
+                    plot_parameter_evolution(ax, data_by_day, valid_days, param)
                     
                     # Adicionar resultado do teste
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
@@ -346,9 +629,14 @@ def main():
                     )
                 except Exception as e:
                     st.error(f"Erro ao processar {param}: {str(e)}")
+                    continue
             else:
                 st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
-    
+                continue
+    else:
+        st.warning("Nenhum parâmetro selecionado para análise.")
+        return
+
     # Resultados Estatísticos
     st.markdown("""
     <div class="card">
@@ -361,15 +649,23 @@ def main():
     """, unsafe_allow_html=True)
     
     if results:
+        # Formatar a tabela de resultados
         results_df = pd.DataFrame(results)
         results_df['Significância'] = results_df['p-value'].apply(
             lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
         )
+        
+        # Reordenar colunas
         results_df = results_df[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
         
+        # Estilizar a tabela
         st.dataframe(
             results_df.style
             .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
+            .set_properties(**{
+                'color': 'white',
+                'background-color': '#131625',
+            })
             .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
                                if x['p-value'] < 0.05 else '' for i in x], axis=1)
         )
@@ -382,14 +678,16 @@ def main():
         <div class="card">
             <h2 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📊 Relação Dose-Concentração
+                    📊 Evolução Temporal dos Parâmetros
                 </span>
             </h2>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown(f'<div style="margin-top:20px;margin-bottom:30px;color:#a0a7c0;font-size:1.1rem;text-align:center;">Tipo de Vermicomposto: <strong>{selected_type}</strong></div>', unsafe_allow_html=True)
+        # Adicionar espaçamento visual entre os gráficos
+        st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True)
         
+        # Ajustar layout com espaço adicional
         plt.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
@@ -397,7 +695,7 @@ def main():
     # Interpretação
     display_results_interpretation(results)
     
-    # Referência Bibliográfica
+    # Referência Bibliográfica (Formato ABNT)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -411,15 +709,16 @@ def main():
     st.markdown("""
     <div class="reference-card">
         <p style="line-height:1.8; text-align:justify;">
-            JORDÃO, C. P. et al. Reduction of heavy metal contents in liquid effluents by vermicomposts 
-            and the use of the metal-enriched vermicomposts in lettuce cultivation. 
-            <strong>Bioresource Technology</strong>, v. 98, n. 14, p. 2800-2813, 2007.
+            DERMENDZHIEVA, D.; WRBKA, T.; KÜHBACHER, T. M.; et al. 
+            Vermicomposting of different organic materials using the earthworm species Eisenia fetida. 
+            <strong>Environmental Science and Pollution Research</strong>, 
+            v. 28, p. 12372–12389, 2021. 
+            Disponível em: https://doi.org/10.1007/s11356-020-11285-y. 
+            Acesso em: 21 jun. 2023.
         </p>
-        <p style="margin-top:15px;">
-            <strong>Resumo:</strong> O estudo avaliou a eficiência do vermicomposto na remoção de metais pesados 
-            (Cu, Ni, Zn) de efluentes de galvanoplastia e o uso subsequente do vermicomposto enriquecido 
-            no cultivo de alface. Os resultados mostraram alta eficiência na remoção de metais (>95%) e 
-            padrões distintos de acumulação nas folhas e raízes da alface.
+        <p style="margin-top:20px; font-style:italic;">
+            Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. 
+            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
         </p>
     </div>
     """, unsafe_allow_html=True)
