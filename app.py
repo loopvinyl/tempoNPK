@@ -128,6 +128,24 @@ st.markdown("""
         margin-right: 10px;
         color: #00c1e0;
     }
+    
+    /* Listas formatadas */
+    .custom-list li {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+    
+    .custom-list ul {
+        padding-left: 25px;
+        margin-top: 8px;
+    }
+    
+    .custom-list code {
+        background: rgba(100, 110, 200, 0.2);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -476,10 +494,9 @@ def main():
     """, unsafe_allow_html=True)
     
     st.dataframe(df)
-    
-    # Explicação detalhada sobre a produção das amostras
     st.markdown(f"**Total de amostras:** {len(df)}")
     
+    # Explicação detalhada sobre a produção das amostras
     st.markdown("""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
@@ -488,7 +505,7 @@ def main():
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
             <p>As amostras foram geradas por simulação computacional seguindo um protocolo rigoroso:</p>
             
-            <ol>
+            <ol class="custom-list">
                 <li><strong>Base em dados científicos</strong>: Valores médios e desvios padrão foram extraídos do estudo de referência</li>
                 <li><strong>Estratégia de réplicas</strong>: Para cada combinação de parâmetro/dia, foram geradas 3 réplicas independentes</li>
                 <li><strong>Modelagem estatística</strong>: Cada valor foi simulado usando distribuição normal: 
