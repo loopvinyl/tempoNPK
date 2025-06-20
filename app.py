@@ -14,9 +14,11 @@ from matplotlib.ticker import MaxNLocator
 st.set_page_config(page_title="Análise Estatística de Vermicompostagem", layout="wide")
 st.title("📊 Análise Estatística de Parâmetros de Vermicomposto")
 st.markdown("""
-**Aplicação para análise de diferenças significativas em parâmetros de vermicomposto ao longo do tempo**
-Utiliza o teste de Kruskal-Wallis (não paramétrico) para pequenas amostras.
-""")
+<div style="background-color:#f0f8ff; padding:15px; border-radius:10px; margin-bottom:20px;">
+    <b>Aplicação para análise de diferenças significativas em parâmetros de vermicomposto ao longo do tempo</b><br>
+    Utiliza o teste de Kruskal-Wallis (não paramétrico) para pequenas amostras.
+</div>
+""", unsafe_allow_html=True)
 
 ## Mapeamento de parâmetros para nomes amigáveis
 PARAM_MAPPING = {
@@ -225,13 +227,72 @@ def plot_parameter_evolution(ax, data, days, param_name):
     
     return ax
 
+## Função para exibir resultados com formatação melhorada
+def display_results_interpretation(results):
+    st.header("📝 Interpretação dos Resultados", anchor="interpretation")
+    
+    if not results:
+        st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
+        return
+    
+    for res in results:
+        param_name = res["Parâmetro"]
+        p_val = res["p-value"]
+        is_significant = p_val < 0.05
+        
+        # Container com cor baseada na significância
+        bg_color = "#e6f7e6" if is_significant else "#f9f9f9"
+        border_color = "#4CAF50" if is_significant else "#9E9E9E"
+        icon = "✅" if is_significant else "❌"
+        title = f"{icon} {param_name}"
+        
+        st.markdown(
+            f"""
+            <div style="
+                background-color: {bg_color};
+                border-left: 5px solid {border_color};
+                padding: 15px;
+                border-radius: 0px 8px 8px 0px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            ">
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; color: #333;">{title}</h3>
+                    <span style="margin-left: auto; font-weight: bold; color: #555;">
+                        p-valor = {p_val:.4f}
+                    </span>
+                </div>
+                <div style="border-top: 1px solid #ddd; padding-top: 10px;">
+            """,
+            unsafe_allow_html=True
+        )
+        
+        if is_significant:
+            st.markdown("""
+                <div style="color: #333;">
+                    <p style="margin: 5px 0;"><b>Rejeitamos a hipótese nula (H₀)</b></p>
+                    <p style="margin: 5px 0;">Há evidências de que os valores do parâmetro mudam significativamente ao longo do tempo</p>
+                    <p style="margin: 5px 0;">A vermicompostagem afeta este parâmetro</p>
+                </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+                <div style="color: #333;">
+                    <p style="margin: 5px 0;"><b>Aceitamos a hipótese nula (H₀)</b></p>
+                    <p style="margin: 5px 0;">Não há evidências suficientes de mudanças significativas</p>
+                    <p style="margin: 5px 0;">O parâmetro permanece estável durante o processo de vermicompostagem</p>
+                </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
 ## Função Principal
 def main():
     # Inicialização de variáveis
     df = load_sample_data_with_stdev()
     
     # Opções de Dados na Sidebar
-    st.sidebar.header("Opções de Dados")
+    st.sidebar.header("📂 Opções de Dados")
     use_sample = st.sidebar.checkbox("Usar dados de exemplo", value=True)
     
     if not use_sample:
@@ -241,7 +302,7 @@ def main():
                 df_raw = extract_pdf_data(uploaded_file)
                 
                 if df_raw is not None:
-                    st.sidebar.info("Tabela extraída do PDF com sucesso!")
+                    st.sidebar.success("Tabela extraída do PDF com sucesso!")
                     st.sidebar.dataframe(df_raw.head(3))
                     
                     extracted_data = process_raw_table(df_raw)
@@ -284,13 +345,13 @@ def main():
             st.info("Nenhum PDF carregado. Usando dados de exemplo.")
 
     # Pré-visualização dos Dados
-    st.header("Pré-visualização dos Dados")
-    st.dataframe(df.head())
+    st.header("🔍 Pré-visualização dos Dados")
+    st.dataframe(df.head().style.highlight_max(axis=0, color='#e6f7ff'))
     st.markdown(f"**Total de amostras:** {len(df)}")
     st.markdown("---")
 
     # Configuração de Análise
-    st.sidebar.header("Configuração de Análise")
+    st.sidebar.header("⚙️ Configuração de Análise")
     unique_params = df['Parameter'].unique()
     
     # Criar opções com nomes amigáveis
@@ -363,55 +424,53 @@ def main():
             ax.annotate(f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}",
                         xy=(0.5, 0.95), xycoords='axes fraction',
                         ha='center', fontsize=10,
-                        bbox=dict(boxstyle="round,pad=0.3", fc="yellow", alpha=0.5))
+                        bbox=dict(boxstyle="round,pad=0.3", fc="white", alpha=0.8))
         else:
             st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
     
     # Resultados Estatísticos
-    st.header("Resultados Estatísticos")
+    st.header("📈 Resultados Estatísticos")
     if results:
+        # Formatar a tabela de resultados
         results_df = pd.DataFrame(results)
-        st.dataframe(results_df.style.apply(
-            lambda x: ['background-color: #fffd8e' if x['p-value'] < 0.05 else '' for _ in x],
-            axis=1
-        ))
+        results_df['Significância'] = results_df['p-value'].apply(
+            lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
+        )
+        
+        # Reordenar colunas
+        results_df = results_df[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
+        
+        # Estilizar a tabela
+        def highlight_significant(row):
+            return ['background-color: #e6f7e6' if row['p-value'] < 0.05 else '' for _ in row]
+        
+        st.dataframe(
+            results_df.style
+            .apply(highlight_significant, axis=1)
+            .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
+            .set_properties(**{'text-align': 'center'})
+        )
     else:
         st.info("Nenhum resultado estatístico disponível.")
     
     # Pressupostos Estatísticos
     if assumptions_results:
-        st.subheader("Verificação de Pressupostos (Normalidade)")
+        st.subheader("📏 Verificação de Pressupostos (Normalidade)")
         for res in assumptions_results:
             st.markdown(f"**{res['Parâmetro']}**")
             st.dataframe(res['Resultados'])
     
     # Gráficos
-    st.header("Evolução Temporal dos Parâmetros")
+    st.header("📊 Evolução Temporal dos Parâmetros")
     plt.tight_layout()
     st.pyplot(fig)
+    plt.close(fig)
     
-    # Interpretação
-    st.header("Interpretação dos Resultados")
-    if results:
-        for res in results:
-            st.subheader(res["Parâmetro"])
-            if res["p-value"] < 0.05:
-                st.success(f"✅ **Diferenças significativas!** (p = {res['p-value']:.4f})")
-                st.markdown("""
-                - **Rejeitamos a hipótese nula (H₀)**
-                - Mudanças significativas ao longo do tempo
-                - A vermicompostagem afeta este parâmetro
-                """)
-            else:
-                st.warning(f"❌ **Sem diferenças significativas** (p = {res['p-value']:.4f})")
-                st.markdown("""
-                - **Aceitamos a hipótese nula (H₀)**
-                - Parâmetro estável durante o processo
-                - Sem impacto estatisticamente detectável
-                """)
+    # Interpretação (usando a nova função com design melhorado)
+    display_results_interpretation(results)
     
     # Metodologia
-    st.sidebar.header("Sobre a Metodologia")
+    st.sidebar.header("📚 Sobre a Metodologia")
     st.sidebar.markdown("""
     **Teste de Kruskal-Wallis**
     - Alternativa não paramétrica à ANOVA
