@@ -1764,7 +1764,7 @@ def run_sharma_analysis():
                 de nutrientes entre as espécies testadas.
                 
                 3. A razão C/N foi significativamente reduzida em todos os vermicompostos em comparação 
-                com o solo original, indicando maior maturidade e estabilidade do composto.<br><br>
+                com o solo original, indicando maior maturidade e estabilidade do composto.
                 
                 4. O estudo demonstra que a vermicompostagem com espécies locais é uma técnica eficaz 
                 para transformar resíduos de cozinha em fertilizante orgânico de alta qualidade.
