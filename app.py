@@ -1,329 +1,175 @@
-# ===================================================================
-# MÓDULO JORDÃO ET AL. (2007) - ANÁLISE COMPARATIVA (CORRIGIDA)
-# ===================================================================
-def run_jordao_analysis():
-    """Módulo para análise comparativa de tratamentos (versão corrigida)"""
+import streamlit as st
+import pandas as pd
+import numpy as np
+from scipy.stats import kruskal
+import matplotlib.pyplot as plt
+import seaborn as sns
+import tabula
+import base64
+
+# Configurações gerais
+st.set_page_config(page_title="Análise Estatística de Vermicompostagem", layout="wide")
+st.title("📊 Análise Estatística de Parâmetros de Vermicomposto")
+st.markdown("""
+**Aplicação para análise de diferenças significativas em parâmetros de vermicomposto ao longo do tempo**  
+Utiliza o teste de Kruskal-Wallis (não paramétrico) para pequenas amostras.
+""")
+
+# Função para carregar dados de exemplo
+def load_sample_data():
+    """Dados de exemplo baseados no artigo DERMENDZHIEVA et al. (2021)"""
+    return pd.DataFrame({
+        'Parameter': ['TKN (gkg⁻¹)', 'TKN (gkg⁻¹)', 'TKN (gkg⁻¹)', 'TKN (gkg⁻¹)', 'TKN (gkg⁻¹)',
+                      'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)',
+                      'TK (gkg⁻¹)', 'TK (gkg⁻¹)', 'TK (gkg⁻¹)', 'TK (gkg⁻¹)', 'TK (gkg⁻¹)',
+                      'pH (H₂O)', 'pH (H₂O)', 'pH (H₂O)', 'pH (H₂O)', 'pH (H₂O)',
+                      'C/N ratio', 'C/N ratio', 'C/N ratio', 'C/N ratio', 'C/N ratio'],
+        'Substrate': ['VC-M']*25,
+        'Day 1': [20.8, 12.1, 1.28, 7.04, 11.2] * 5,
+        'Day 30': [21.2, 13.0, 1.24, 5.60, 10.9] * 5,
+        'Day 60': [22.8, 13.9, 1.30, 5.56, 9.67] * 5,
+        'Day 90': [23.3, 14.6, 1.34, 5.27, 9.65] * 5,
+        'Day 120': [25.5, 15.3, 1.45, 5.78, 7.91] * 5
+    })
+
+# Função principal
+def main():
+    # Upload do PDF ou uso de dados de exemplo
+    st.sidebar.header("Opções de Dados")
+    use_sample = st.sidebar.checkbox("Usar dados de exemplo", value=True)
     
-    # Mapeamento de parâmetros
-    PARAM_MAPPING = {
-        "pH": "pH",
-        "Organic Matter": "Matéria Orgânica",
-        "C/N ratio": "Relação C/N",
-        "Cu": "Cobre",
-        "Ni": "Níquel",
-        "Zn": "Zinco",
-        "Cu_leaves": "Cobre nas Folhas",
-        "Ni_leaves": "Níquel nas Folhas",
-        "Zn_leaves": "Zinco nas Folhas",
-        "Cu_roots": "Cobre nas Raízes",
-        "Ni_roots": "Níquel nas Raízes",
-        "Zn_roots": "Zinco nas Raízes",
+    if use_sample:
+        df = load_sample_data()
+        st.sidebar.success("Usando dados de exemplo do artigo DERMENDZHIEVA et al. (2021)")
+    else:
+        uploaded_file = st.sidebar.file_uploader("Carregue o artigo PDF", type="pdf")
+        if not uploaded_file:
+            st.info("Por favor, carregue um PDF ou marque 'Usar dados de exemplo'")
+            return
+            
+        st.sidebar.info(f"Arquivo carregado: {uploaded_file.name}")
+        try:
+            # Extrair tabela da página 4
+            tables = tabula.read_pdf(uploaded_file, pages=4, multiple_tables=True)
+            df = tables[0]
+            st.sidebar.success("Tabela extraída com sucesso!")
+        except Exception as e:
+            st.sidebar.error(f"Erro na extração: {str(e)}")
+            st.error("Não foi possível extrair a tabela. Usando dados de exemplo.")
+            df = load_sample_data()
+
+    # Pré-processamento dos dados
+    st.header("Pré-visualização dos Dados")
+    st.dataframe(df.head())
+    
+    # Selecionar parâmetros para análise
+    st.sidebar.header("Configuração de Análise")
+    parameters = st.sidebar.multiselect(
+        "Selecione os parâmetros para análise:",
+        options=["Nitrogênio (N)", "Fósforo (P)", "Potássio (K)", "pH", "Relação C/N"],
+        default=["Nitrogênio (N)", "Fósforo (P)", "pH"]
+    )
+    
+    # Mapeamento de parâmetros para colunas
+    param_mapping = {
+        "Nitrogênio (N)": "TKN (gkg⁻¹)",
+        "Fósforo (P)": "Total P (gkg⁻¹)",
+        "Potássio (K)": "TK (gkg⁻¹)",
+        "pH": "pH (H₂O)",
+        "Relação C/N": "C/N ratio"
     }
     
-    # Função para carregar dados específicos do artigo
-    @st.cache_data
-    def load_jordao_sample_data():
-        sample_data = {
-            'Vermicompost Characterization': {
-                'pH': {'mean': 7.1, 'stdev': 0.03},
-                'Organic Matter': {'mean': 42.0, 'stdev': 0.34},
-                'C/N ratio': {'mean': 11.85, 'stdev': 0.2},
-                'Cu': {'mean': 31.0, 'stdev': 6.7},
-                'Ni': {'mean': 21.7, 'stdev': 2.1},
-                'Zn': {'mean': 108, 'stdev': 4.4}
-            },
-            'Lettuce Cultivation': {
-                'Cu_leaves': {'mean': 8.1, 'stdev': 1.5},
-                'Ni_leaves': {'mean': 35.3, 'stdev': 3.2},
-                'Zn_leaves': {'mean': 1074.8, 'stdev': 85},
-                'Cu_roots': {'mean': 246.3, 'stdev': 25},
-                'Ni_roots': {'mean': 587.7, 'stdev': 45},
-                'Zn_roots': {'mean': 1339.2, 'stdev': 120}
-            }
-        }
-        
-        treatments = ['Vermicompost Characterization', 'Lettuce Cultivation']
-        num_replications = 3
-        data = []
-        
-        for treatment, params in sample_data.items():
-            for param_name, stats in params.items():
-                for _ in range(num_replications):
-                    row = {'Parameter': param_name, 'Treatment': treatment}
-                    row['Value'] = np.random.normal(stats['mean'], stats['stdev'])
-                    # Garantir valores não-negativos
-                    if 'leaves' in param_name or 'roots' in param_name:
-                        row['Value'] = max(0, row['Value'])
-                    data.append(row)
-        
-        return pd.DataFrame(data)
-    
-    # Função para plotar comparação entre tratamentos (CORRIGIDA)
-    def plot_parameter_comparison(ax, data, treatment_names, param_name):
-        colors = ['#6f42c1', '#00c1e0', '#00d4b1']
-        
-        # Verificar se temos dados para plotar
-        if not data or any(len(group) == 0 for group in data):
-            ax.text(0.5, 0.5, 'Dados insuficientes para plotar', 
-                    ha='center', va='center', fontsize=12, color='white')
-            return ax
-        
-        # Calcular limites para eixo Y
-        all_values = [val for group in data for val in group]
-        if not all_values:
-            ax.text(0.5, 0.5, 'Sem dados disponíveis', 
-                    ha='center', va='center', fontsize=12, color='white')
-            return ax
-        
-        y_min = min(all_values) * 0.9
-        y_max = max(all_values) * 1.1
-        
-        for i, (treatment_data, treatment_name) in enumerate(zip(data, treatment_names)):
-            # Plotar pontos individuais
-            ax.scatter(
-                [i] * len(treatment_data), 
-                treatment_data,
-                color=colors[i % len(colors)],
-                alpha=0.7,
-                s=80,
-                label=treatment_name,
-                edgecolors='white',
-                linewidth=1,
-                zorder=3
-            )
-            
-            # Plotar mediana
-            if len(treatment_data) > 0:
-                median_val = np.median(treatment_data)
-                ax.plot(
-                    [i-0.2, i+0.2],
-                    [median_val, median_val],
-                    color='white',
-                    linewidth=3,
-                    zorder=5
-                )
-        
-        # Configurações do gráfico
-        ax.set_xticks(range(len(treatment_names)))
-        ax.set_xticklabels(treatment_names, fontsize=11)
-        ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold')
-        ax.set_title(f"Comparação de {PARAM_MAPPING.get(param_name, param_name)}", 
-                     fontsize=14, fontweight='bold', pad=15)
-        ax.legend(loc='best', fontsize=10, framealpha=0.3)
-        ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0')
-        ax.set_ylim(y_min, y_max)
-        
-        # Remover bordas
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-        
-        # Fundo gradiente
-        ax.set_facecolor('#0c0f1d')
-        
-        return ax
-
-    # Interface principal do módulo Jordão
-    st.markdown("""
-    <div class="header-card">
-        <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
-            ⚗️ Análise de Remoção de Metais Pesados e Cultivo
-        </h1>
-        <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
-        Jordão et al. (2007) - Redução de metais pesados em efluentes líquidos por vermicompostos
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("← Voltar para seleção de artigos"):
-        del st.session_state['selected_article']
-        st.rerun()
-    
-    # Carregar dados
-    df = load_jordao_sample_data()
-    
-    # Painel de configurações (agora na área principal)
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                ⚙️ Configurações de Análise
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        analysis_type = st.radio(
-            "Tipo de análise:",
-            ('Caracterização do Vermicomposto', 'Cultivo de Alface'),
-            index=0,
-            key="jordao_analysis_type"
-        )
-    
-    with col2:
-        # Filtrar parâmetros baseado no tipo de análise
-        if analysis_type == 'Caracterização do Vermicomposto':
-            param_options = [p for p in df['Parameter'].unique() 
-                           if p in ['pH', 'Organic Matter', 'C/N ratio', 'Cu', 'Ni', 'Zn']]
-        else:
-            param_options = [p for p in df['Parameter'].unique() 
-                           if p in ['Cu_leaves', 'Ni_leaves', 'Zn_leaves', 
-                                    'Cu_roots', 'Ni_roots', 'Zn_roots']]
-        
-        selected_params = st.multiselect(
-            "Selecione os parâmetros:",
-            options=param_options,
-            default=param_options[:2] if param_options else [],
-            key="jordao_param_select"
-        )
-    
-    # Pré-visualização dos dados
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                🔍 Dados do Estudo
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.dataframe(df)
-    st.markdown(f"**Total de amostras:** {len(df)}")
-    
-    # Análise estatística
+    # Realizar testes estatísticos
     results = []
+    fig, axes = plt.subplots(len(parameters), 1, figsize=(10, 5*len(parameters)))
+    if len(parameters) == 1:
+        axes = [axes]
     
-    # Configurar subplots
-    num_plots = len(selected_params) if selected_params else 0
-    
-    if num_plots > 0:
-        fig = plt.figure(figsize=(10, 6 * num_plots))
-        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)
-        axes = [fig.add_subplot(gs[i]) for i in range(num_plots)]
+    for i, param in enumerate(parameters):
+        col_name = param_mapping[param]
+        param_df = df[df['Parameter'] == col_name]
         
-        for i, param in enumerate(selected_params):
-            param_data = []
-            treatment_labels = []
-            
-            # Coletar dados apenas para tratamentos relevantes
-            relevant_treatments = ['Vermicompost Characterization'] if analysis_type == 'Caracterização do Vermicomposto' else ['Lettuce Cultivation']
-            
-            for treatment in relevant_treatments:
-                # Filtrar dados para o parâmetro e tratamento específico
-                treatment_data = df[(df['Parameter'] == param) & 
-                                  (df['Treatment'] == treatment)]['Value'].dropna().values
-                
-                # Verificar se temos dados
-                if len(treatment_data) > 0:
-                    param_data.append(treatment_data)
-                    treatment_labels.append(treatment)
-                else:
-                    st.warning(f"Parâmetro '{param}' não encontrado no tratamento '{treatment}'")
+        # Extrair dados para cada dia
+        days = ['Day 1', 'Day 30', 'Day 60', 'Day 90', 'Day 120']
+        data = [param_df[day].values for day in days]
+        
+        # Teste de Kruskal-Wallis
+        h_stat, p_val = kruskal(*data)
+        results.append({
+            "Parâmetro": param,
+            "H-Statistic": h_stat,
+            "p-value": p_val,
+            "Significativo (p<0.05)": p_val < 0.05
+        })
+        
+        # Criar gráfico
+        ax = axes[i]
+        for j, day_data in enumerate(data):
+            ax.scatter([j]*len(day_data), day_data, alpha=0.6, label=f"Dia {[1,30,60,90,120][j]}")
+        
+        # Adicionar linha de tendência
+        medians = [np.median(day_data) for day_data in data]
+        ax.plot(medians, 'ro-', markersize=8)
+        
+        ax.set_title(f"Evolução do {param}")
+        ax.set_ylabel(param.split('(')[0].strip())
+        ax.set_xticks(range(5))
+        ax.set_xticklabels(['1', '30', '60', '90', '120'])
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        
+        # Adicionar resultado do teste ao gráfico
+        ax.annotate(f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}",
+                    xy=(0.5, 0.05), xycoords='axes fraction',
+                    ha='center', fontsize=9,
+                    bbox=dict(boxstyle="round,pad=0.3", fc="yellow", alpha=0.3))
 
-            # Verificar se temos dados suficientes para análise
-            if len(param_data) >= 1:
-                # Plotar gráfico
-                ax = axes[i]
-                plot_parameter_comparison(ax, param_data, treatment_labels, param)
-                
-                # Adicionar título descritivo
-                ax.set_title(f"{PARAM_MAPPING.get(param, param)} - {analysis_type}", 
-                            fontsize=14, fontweight='bold', pad=15)
-                
-                # Adicionar estatísticas descritivas
-                if len(param_data) > 0:
-                    all_vals = np.concatenate(param_data)
-                    mean_val = np.mean(all_vals)
-                    std_val = np.std(all_vals)
-                    
-                    stats_text = f"Média: {mean_val:.2f} | Desvio Padrão: {std_val:.2f}"
-                    ax.text(
-                        0.5, 0.05, 
-                        stats_text,
-                        transform=ax.transAxes,
-                        ha='center',
-                        va='bottom',
-                        fontsize=11,
-                        color='white',
-                        bbox=dict(
-                            boxstyle="round,pad=0.3",
-                            facecolor='#2a2f45',
-                            alpha=0.8,
-                            edgecolor='none'
-                        )
-                    )
-            else:
-                # Plotar gráfico vazio com mensagem de aviso
-                ax = axes[i]
-                ax.text(0.5, 0.5, 'Dados insuficientes para análise', 
-                        ha='center', va='center', fontsize=12, color='yellow')
+    # Mostrar resultados estatísticos
+    st.header("Resultados Estatísticos")
+    results_df = pd.DataFrame(results)
+    st.dataframe(results_df.style.apply(
+        lambda x: ['background-color: #fffd8e' if x['p-value'] < 0.05 else '' for _ in x], 
+        axis=1
+    ))
     
-    # Resultados estatísticos
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                📊 Visualização dos Parâmetros
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
+    # Mostrar gráficos
+    st.header("Evolução Temporal dos Parâmetros")
+    st.pyplot(fig)
     
-    # Gráficos
-    if num_plots > 0:
-        plt.tight_layout()
-        st.pyplot(fig)
-        plt.close(fig)
-    else:
-        st.info("Nenhum parâmetro selecionado para visualização.")
+    # Interpretação dos resultados
+    st.header("Interpretação dos Resultados")
+    for res in results:
+        st.subheader(res["Parâmetro"])
+        if res["p-value"] < 0.05:
+            st.success(f"✅ Diferenças estatisticamente significativas (p = {res['p-value']:.4f})")
+            st.markdown("""
+            - **Rejeitamos a hipótese nula (H₀)**
+            - Há evidências de que os valores do parâmetro mudam significativamente ao longo do tempo
+            - A vermicompostagem afeta este parâmetro
+            """)
+        else:
+            st.warning(f"❌ Sem diferenças significativas (p = {res['p-value']:.4f})")
+            st.markdown("""
+            - **Aceitamos a hipótese nula (H₀)**
+            - Não há evidências suficientes de mudanças significativas
+            - O parâmetro permanece estável durante o processo
+            """)
     
-    # Referência
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                📚 Referência Bibliográfica
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
+    # Explicação metodológica
+    st.sidebar.header("Sobre a Metodologia")
+    st.sidebar.info("""
+    **Teste de Kruskal-Wallis:**
+    - Teste não paramétrico equivalente à ANOVA
+    - Usado quando os dados não atendem aos pressupostos de normalidade
+    - Adequado para pequenas amostras (n = 3 neste estudo)
     
-    st.markdown("""
-    <div class="reference-card">
-        <p style="line-height:1.8; text-align:justify;">
-            JORDÃO, C.P.; FIALHO, L.L.; NEVES, J.C.L.; CECON, P.R.; MENDONÇA, E.S.; FONTES, R.L.F. 
-            Reduction of heavy metal contents in liquid effluents by vermicomposts and the use of the metal-enriched vermicomposts in lettuce cultivation. 
-            <strong>Bioresource Technology</strong>, 
-            v. 98, p. 2800-2813, 2007.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    **Hipóteses:**
+    - H₀: As distribuições são iguais em todos os grupos
+    - H₁: Pelo menos um grupo difere dos demais
+    
+    **Significância:**
+    - p < 0.05 → Rejeita H₀ (diferenças significativas)
+    """)
 
-    # Informações adicionais sobre o estudo
-    st.markdown("""
-    <div class="info-card">
-        <h3 style="display:flex;align-items:center;color:#00c1e0;">
-            <span class="info-icon">ℹ️</span> Sobre o Estudo de Jordão et al. (2007)
-        </h3>
-        <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
-            <p>
-                Este estudo investiga a capacidade dos vermicompostos na remoção de metais pesados
-                de efluentes líquidos e seu uso subsequente no cultivo de alface. A pesquisa
-                demonstra que vermicompostos enriquecidos com metais podem ser utilizados com
-                segurança na agricultura, desde que monitorados os níveis de acúmulo nas plantas.
-            </p>
-            <p>
-                <b>Principais conclusões:</b>
-                <ul>
-                    <li>Vermicompostos removem eficientemente metais pesados de efluentes</li>
-                    <li>Metais são imobilizados em formas menos biodisponíveis</li>
-                    <li>Alface cultivada com vermicomposto mostrou crescimento satisfatório</li>
-                    <li>Metais acumulam-se principalmente nas raízes, não nas partes comestíveis</li>
-                </ul>
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+if __name__ == "__main__":
+    main()
