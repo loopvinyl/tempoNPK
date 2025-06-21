@@ -1760,8 +1760,8 @@ def run_sharma_analysis():
                 1. Todos os vermicompostos apresentaram valores nutricionais significativamente superiores 
                 ao solo original, especialmente em Nitrogênio, Fósforo e Potássio.<br><br>
                 
-                2. O vermicomposto produzido por <i>Octolasion tyrateum</i> (VKO) mostrou os maiores teores 
-                de nutrientes entre as espécies testadas.<br><br>
+                2. O vermicomposto produzido por Octolasion tyrateum (VKO) mostrou os maiores teores 
+                de nutrientes entre as espécies testadas.
                 
                 3. A razão C/N foi significativamente reduzida em todos os vermicompostos em comparação 
                 com o solo original, indicando maior maturidade e estabilidade do composto.<br><br>
