@@ -1768,8 +1768,6 @@ def run_sharma_analysis():
                 
                 4. O estudo demonstra que a vermicompostagem com espécies locais é uma técnica eficaz 
                 para transformar resíduos de cozinha em fertilizante orgânico de alta qualidade.
-            </p>
-        </div>
     </div>
     """, unsafe_allow_html=True)
     
