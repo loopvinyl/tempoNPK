@@ -8,7 +8,7 @@ from matplotlib.ticker import MaxNLocator
 
 # Configurações gerais com tema escuro
 st.set_page_config(
-    page_title="Análise de Vermicompostos",  # Título alterado
+    page_title="Análise de Vermicompostos",
     layout="wide",
     page_icon="📊"
 )
@@ -295,7 +295,7 @@ def run_dermendzhieva_analysis():
                     if stats:
                         if distribution_type == 'Normal':
                             simulated_value = np.random.normal(
-                                loc=stats['mean'],  
+                                loc=stats['mean'], 
                                 scale=stats['stdev']
                             )
                         elif distribution_type == 'LogNormal':
@@ -314,7 +314,7 @@ def run_dermendzhieva_analysis():
                             )
                         else:
                             simulated_value = np.random.normal(
-                                loc=stats['mean'],  
+                                loc=stats['mean'], 
                                 scale=stats['stdev']
                             )
                             
@@ -322,7 +322,7 @@ def run_dermendzhieva_analysis():
                             simulated_value = np.clip(simulated_value, 0.0, 14.0)
                         elif 'g/kg' in param_name or 'ratio' in param_name:
                             simulated_value = max(0.0, simulated_value)
-                            
+                        
                         row_data[day] = simulated_value
                     else:
                         row_data[day] = np.nan
@@ -343,9 +343,9 @@ def run_dermendzhieva_analysis():
             
             # Plotar pontos individuais com efeito de profundidade
             ax.scatter(
-                [num_day] * len(group_data),  
-                group_data,  
-                alpha=0.85,  
+                [num_day] * len(group_data), 
+                group_data, 
+                alpha=0.85, 
                 s=100,
                 color=colors[i % len(colors)],
                 edgecolors='white',
@@ -354,13 +354,13 @@ def run_dermendzhieva_analysis():
                 label=f"{day.replace('Day ', 'Dia ')}",
                 marker='o'
             )
-            
+        
         # Calcular e plotar medianas com estilo premium
         medians = [np.median(group) for group in data]
         ax.plot(
-            numeric_days,  
-            medians,  
-            'D-',  
+            numeric_days, 
+            medians, 
+            'D-', 
             markersize=10,
             linewidth=3,
             color='#ffffff',
@@ -379,8 +379,8 @@ def run_dermendzhieva_analysis():
         # Melhorar formatação
         ax.set_xlabel("Dias de Vermicompostagem", fontsize=12, fontweight='bold', labelpad=15)
         ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
-        ax.set_title(f"Evolução do {PARAM_MAPPING.get(param_name, param_name)}",  
-                                  fontsize=14, fontweight='bold', pad=20)
+        ax.set_title(f"Evolução do {PARAM_MAPPING.get(param_name, param_name)}", 
+                             fontsize=14, fontweight='bold', pad=20)
         
         # Grid e estilo
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
@@ -507,9 +507,7 @@ def run_dermendzhieva_analysis():
         distribution_type = "LogNormal"
     
     with col2:
-        # Carregar dados temporariamente para obter os parâmetros
-        temp_df = load_sample_data_with_stdev(distribution_type)
-        unique_params = temp_df['Parameter'].unique()
+        unique_params = df['Parameter'].unique()
         param_options = [PARAM_MAPPING.get(p, p) for p in unique_params]
         
         selected_params = st.multiselect(
@@ -618,7 +616,7 @@ def run_dermendzhieva_analysis():
                     # Adicionar resultado do teste
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
                     ax.text(
-                        0.5, 0.95,  
+                        0.5, 0.95, 
                         annotation_text,
                         transform=ax.transAxes,
                         ha='center',
@@ -671,8 +669,8 @@ def run_dermendzhieva_analysis():
                 'color': 'white',
                 'background-color': '#131625',
             })
-            .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)'  
-                                 if x['p-value'] < 0.05 else '' for i in x], axis=1)
+            .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
+                               if x['p-value'] < 0.05 else '' for i in x], axis=1)
         )
     else:
         st.info("Nenhum resultado estatístico disponível.")
@@ -772,6 +770,7 @@ def run_jordao_analysis():
             }
         }
         
+        treatments = ['Vermicompost Characterization', 'Lettuce Cultivation']
         num_replications = 3
         data = []
         
@@ -794,7 +793,7 @@ def run_jordao_analysis():
         for i, (treatment_data, treatment_name) in enumerate(zip(data, treatment_names)):
             # Plotar pontos individuais
             ax.scatter(
-                [i] * len(treatment_data),  
+                [i] * len(treatment_data), 
                 treatment_data,
                 color=colors[i],
                 alpha=0.7,
@@ -819,8 +818,8 @@ def run_jordao_analysis():
         ax.set_xticks(range(len(treatment_names)))
         ax.set_xticklabels(treatment_names, fontsize=11)
         ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold')
-        ax.set_title(f"Comparação de {PARAM_MAPPING.get(param_name, param_name)} entre Tratamentos",  
-                                  fontsize=14, fontweight='bold', pad=15)
+        ax.set_title(f"Comparação de {PARAM_MAPPING.get(param_name, param_name)} entre Tratamentos", 
+                     fontsize=14, fontweight='bold', pad=15)
         ax.legend(loc='best', fontsize=10, framealpha=0.3)
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0')
         
@@ -832,22 +831,18 @@ def run_jordao_analysis():
         ax.set_facecolor('#0c0f1d')
         
         return ax
-
-    # Função para exibir resultados
-    def display_results_interpretation(results):
+    
+    # Função para exibir resultados com contexto específico
+    def display_jordao_results_interpretation(results):
         st.markdown("""
         <div class="card">
             <h2 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📝 Interpretação dos Resultados
+                    📝 Interpretação dos Resultados - Jordão et al. (2007)
                 </span>
             </h2>
         </div>
         """, unsafe_allow_html=True)
-        
-        if not results:
-            st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
-            return
         
         for res in results:
             param_name = res["Parâmetro"]
@@ -874,59 +869,68 @@ def run_jordao_analysis():
                 <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
             """, unsafe_allow_html=True)
             
+            # Contexto específico para metais pesados
+            metal_context = ""
+            if "Cobre" in param_name or "Níquel" in param_name or "Zinco" in param_name:
+                metal_context = """
+                <div style="background:#2a2f45;padding:10px;border-radius:8px;margin-top:10px;">
+                    <b>Relevância no contexto do artigo:</b> Este parâmetro foi estudado como 
+                    indicador de eficiência na remoção de metais pesados e seu impacto no 
+                    cultivo de alface.
+                </div>
+                """
+            
             if is_significant:
-                st.markdown("""
-                    <div style="color:#e0e5ff; line-height:1.8;">
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                            <span style="color:#00c853; font-size:1.5rem;">•</span>
-                            <b>Rejeitamos a hipótese nula (H₀)</b>
-                        </p>
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                            <span style="color:#00c853; font-size:1.5rem;">•</span>
-                            Há evidências de que os valores do parâmetro diferem significativamente entre os tratamentos.
-                        </p>
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                            <span style="color:#00c853; font-size:1.5rem;">•</span>
-                            O tratamento de vermicompostagem (ou as condições de cultivo) afetou este parâmetro.
-                        </p>
-                    </div>
+                st.markdown(f"""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        <b>Diferenças significativas encontradas entre tratamentos</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        O tratamento aplicado afeta este parâmetro de forma estatisticamente detectável
+                    </p>
+                    {metal_context}
+                </div>
                 """, unsafe_allow_html=True)
             else:
-                st.markdown("""
-                    <div style="color:#e0e5ff; line-height:1.8;">
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                            <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                            <b>Aceitamos a hipótese nula (H₀)</b>
-                        </p>
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                            <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                            Não há evidências suficientes para afirmar que os valores do parâmetro diferem significativamente entre os tratamentos.
-                        </p>
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                            <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                            O parâmetro parece não ser influenciado pelos diferentes tratamentos aplicados.
-                        </p>
-                    </div>
+                st.markdown(f"""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        <b>Não foram encontradas diferenças significativas entre tratamentos</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        O tratamento aplicado não afeta este parâmetro de forma estatisticamente detectável
+                    </p>
+                    {metal_context}
+                </div>
                 """, unsafe_allow_html=True)
             
             st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # Interface principal do módulo
+    
+    # Interface principal do módulo Jordão
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
             ⚗️ Análise de Remoção de Metais Pesados e Cultivo
         </h1>
         <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
-        Jordão et al. (2007) - Vermicompostagem de resíduos da indústria de celulose
+        Jordão et al. (2007) - Redução de metais pesados em efluentes líquidos por vermicompostos
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    if st.button("← Voltar para seleção de artigos", key="btn_back_jordao"):
+    if st.button("← Voltar para seleção de artigos"):
         del st.session_state['selected_article']
         st.rerun()
     
+    # Carregar dados
+    df = load_jordao_sample_data()
+    
+    # Painel de configurações (agora na área principal)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -937,100 +941,75 @@ def run_jordao_analysis():
     </div>
     """, unsafe_allow_html=True)
     
-    df = load_jordao_sample_data()
+    col1, col2 = st.columns(2)
     
-    analysis_type = st.radio(
-        "Selecione o tipo de análise:",
-        ["Caracterização do Vermicomposto", "Cultivo de Alface"],
-        key="analysis_type_jordao"
-    )
+    with col1:
+        analysis_type = st.radio(
+            "Tipo de análise:",
+            ('Caracterização do Vermicomposto', 'Cultivo de Alface'),
+            index=0
+        )
     
-    # Filtrar opções de parâmetro baseadas no tipo de análise
-    if analysis_type == "Caracterização do Vermicomposto":
-        options = [p for p in df['Parameter'].unique() if not ("leaves" in p or "roots" in p)]
-    else:
-        options = [p for p in df['Parameter'].unique() if "leaves" in p or "roots" in p]
-
-    param_options_display = [PARAM_MAPPING.get(p, p) for p in options]
+    with col2:
+        # Filtrar parâmetros baseado no tipo de análise
+        if analysis_type == 'Caracterização do Vermicomposto':
+            param_options = [p for p in df['Parameter'].unique() 
+                           if p not in ['Cu_leaves', 'Ni_leaves', 'Zn_leaves', 
+                                       'Cu_roots', 'Ni_roots', 'Zn_roots']]
+        else:
+            param_options = [p for p in df['Parameter'].unique() 
+                           if p not in ['pH', 'Organic Matter', 'C/N ratio', 
+                                       'Cu', 'Ni', 'Zn']]
+        
+        selected_params = st.multiselect(
+            "Selecione os parâmetros:",
+            options=param_options,
+            default=param_options[:2],
+            key="param_select"
+        )
     
-    selected_params = st.multiselect(
-        "Selecione os parâmetros para análise:",
-        options=param_options_display,
-        default=param_options_display[:min(2, len(param_options_display))],
-        key="jordao_param_select"
-    )
-    
-    if not selected_params:
-        st.warning("Selecione ao menos um parâmetro para análise.")
-        return
-
+    # Pré-visualização dos dados
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
             <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                🔍 Pré-visualização Completa dos Dados
+                🔍 Dados do Estudo
             </span>
         </h2>
     </div>
     """, unsafe_allow_html=True)
+    
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
     
-    st.markdown("""
-    <div class="info-card">
-        <h3 style="display:flex;align-items:center;color:#00c1e0;">
-            <span class="info-icon">ℹ️</span> Como as amostras foram produzidas
-        </h3>
-        <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
-            <p>
-                As amostras para esta análise são geradas por simulação com base em dados de média e desvio padrão. Cada ponto de dado é criado usando uma <b>distribuição normal</b> para simular a variabilidade dos experimentos reais. Para parâmetros como concentrações de metais em plantas, os valores são ajustados para garantir que não sejam negativos, refletindo a natureza física dos dados.
-            </p>
-            <p>
-                Essa abordagem permite explorar a variabilidade esperada dos resultados em diferentes tratamentos ou condições de cultivo, como a caracterização do vermicomposto e a absorção de metais por alface.
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Análise estatística
+    results = []
+    treatments = df['Treatment'].unique()
     
-    st.divider()
-
-    # Converter de volta para nomes originais
-    reverse_mapping_jordao = {v: k for k, v in PARAM_MAPPING.items()}
-    selected_original_params_jordao = [reverse_mapping_jordao.get(p, p) for p in selected_params]
+    # Configurar subplots
+    num_plots = len(selected_params)
     
-    results_jordao = []
-    
-    num_plots_jordao = len(selected_params)
-    
-    if num_plots_jordao > 0:
-        fig_jordao = plt.figure(figsize=(10, 6 * num_plots_jordao))
-        gs_jordao = fig_jordao.add_gridspec(num_plots_jordao, 1, hspace=0.6)
+    if num_plots > 0:
+        fig = plt.figure(figsize=(10, 6 * num_plots))
+        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)
+        axes = [fig.add_subplot(gs[i]) for i in range(num_plots)]
         
-        axes_jordao = []
-        for i in range(num_plots_jordao):
-            ax = fig_jordao.add_subplot(gs_jordao[i])
-            axes_jordao.append(ax)
-
-        for i, param in enumerate(selected_original_params_jordao):
+        for i, param in enumerate(selected_params):
             param_data = []
-            treatment_names = []
-            
-            # Coletar dados por tratamento
-            for treat in df['Treatment'].unique():
-                # Filtrar apenas os parâmetros relevantes para o tipo de análise selecionado
-                if (analysis_type == "Caracterização do Vermicomposto" and not ("leaves" in param or "roots" in param)) or \
-                   (analysis_type == "Cultivo de Alface" and ("leaves" in param or "roots" in param)):
-                    
-                    vals = df[(df['Parameter'] == param) & (df['Treatment'] == treat)]['Value'].dropna().values
-                    if len(vals) > 1:
-                        param_data.append(vals)
-                        treatment_names.append(treat)
-            
-            # Executar teste de Kruskal-Wallis
-            if len(param_data) >= 2:
+            treatment_labels = []
+
+            for treatment in treatments:
+                treatment_data = df[(df['Parameter'] == param) & 
+                                  (df['Treatment'] == treatment)]['Value'].dropna().values
+                if len(treatment_data) > 0:
+                    param_data.append(treatment_data)
+                    treatment_labels.append(treatment)
+
+            # Verificar se temos dados suficientes para análise
+            if len(param_data) >= 2 and all(len(group) > 1 for group in param_data):
                 try:
                     h_stat, p_val = kruskal(*param_data)
-                    results_jordao.append({
+                    results.append({
                         "Parâmetro": PARAM_MAPPING.get(param, param),
                         "H-Statistic": h_stat,
                         "p-value": p_val,
@@ -1038,13 +1017,13 @@ def run_jordao_analysis():
                     })
                     
                     # Plotar gráfico
-                    ax = axes_jordao[i]
-                    plot_parameter_comparison(ax, param_data, treatment_names, param)
+                    ax = axes[i]
+                    plot_parameter_comparison(ax, param_data, treatment_labels, param)
                     
                     # Adicionar resultado do teste
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
                     ax.text(
-                        0.5, 0.95,  
+                        0.5, 0.95, 
                         annotation_text,
                         transform=ax.transAxes,
                         ha='center',
@@ -1060,15 +1039,10 @@ def run_jordao_analysis():
                     )
                 except Exception as e:
                     st.error(f"Erro ao processar {param}: {str(e)}")
-                    continue
             else:
                 st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
-                continue
-    else:
-        st.warning("Nenhum parâmetro selecionado para análise.")
-        return
-
-    # Resultados Estatísticos
+    
+    # Resultados estatísticos
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1079,48 +1053,43 @@ def run_jordao_analysis():
     </div>
     """, unsafe_allow_html=True)
     
-    if results_jordao:
-        results_df_jordao = pd.DataFrame(results_jordao)
-        results_df_jordao['Significância'] = results_df_jordao['p-value'].apply(
+    if results:
+        results_df = pd.DataFrame(results)
+        results_df['Significância'] = results_df['p-value'].apply(
             lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
         )
-        
-        results_df_jordao = results_df_jordao[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
+        results_df = results_df[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
         
         st.dataframe(
-            results_df_jordao.style
+            results_df.style
             .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
-            .set_properties(**{
-                'color': 'white',
-                'background-color': '#131625',
-            })
+            .set_properties(**{'color': 'white', 'background-color': '#131625'})
             .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
-                                 if x['p-value'] < 0.05 else '' for i in x], axis=1)
+                            if x['p-value'] < 0.05 else '' for i in x], axis=1)
         )
     else:
         st.info("Nenhum resultado estatístico disponível.")
     
     # Gráficos
-    if num_plots_jordao > 0:
+    if num_plots > 0:
         st.markdown("""
         <div class="card">
             <h2 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📊 Comparação de Parâmetros entre Tratamentos
+                    📊 Comparação entre Tratamentos
                 </span>
             </h2>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True)
         plt.tight_layout()
-        st.pyplot(fig_jordao)
-        plt.close(fig_jordao)
+        st.pyplot(fig)
+        plt.close(fig)
     
     # Interpretação
-    display_results_interpretation(results_jordao)
+    display_jordao_results_interpretation(results)
     
-    # Referência Bibliográfica (Formato ABNT)
+    # Referência
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1134,33 +1103,29 @@ def run_jordao_analysis():
     st.markdown("""
     <div class="reference-card">
         <p style="line-height:1.8; text-align:justify;">
-            JORDÃO, C. L.; PEREIRA, M. G.; FONTANELLA, S. A.; et al. 
-            Vermicompostagem de resíduos da indústria de celulose para produção de substrato agrícola e remediação de metais pesados. 
-            <strong>Revista Brasileira de Ciência do Solo</strong>, 
-            v. 31, p. 741-750, 2007. 
-            Disponível em: https://www.scielo.br/j/rbcs/a/5NfK4ZgM7Q8J2yYqT8j6X3S/?lang=pt. 
-            Acesso em: 21 jun. 2023.
-        </p>
-        <p style="margin-top:20px; font-style:italic;">
-            Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. 
-            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
+            JORDÃO, C.P.; FIALHO, L.L.; NEVES, J.C.L.; CECON, P.R.; MENDONÇA, E.S.; FONTES, R.L.F. 
+            Reduction of heavy metal contents in liquid effluents by vermicomposts and the use of the metal-enriched vermicomposts in lettuce cultivation. 
+            <strong>Bioresource Technology</strong>, 
+            v. 98, p. 2800-2813, 2007.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 # ===================================================================
-# ROTEAMENTO PRINCIPAL
+# ROTEADOR PRINCIPAL
 # ===================================================================
 def main():
+    # Inicializar estado da sessão
     if 'selected_article' not in st.session_state:
         st.session_state['selected_article'] = None
-
-    if st.session_state['selected_article'] == 'dermendzhieva':
+    
+    # Roteamento
+    if st.session_state['selected_article'] is None:
+        show_homepage()
+    elif st.session_state['selected_article'] == 'dermendzhieva':
         run_dermendzhieva_analysis()
     elif st.session_state['selected_article'] == 'jordao':
         run_jordao_analysis()
-    else:
-        show_homepage()
 
 if __name__ == "__main__":
     main()
