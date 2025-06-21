@@ -5,8 +5,7 @@ from scipy.stats import kruskal
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.ticker import MaxNLocator
-# Importar a biblioteca streamlit_js_eval para interações JavaScript
-from streamlit_js_eval import streamlit_js_eval
+from streamlit_js_eval import streamlit_js_eval # Importar a biblioteca
 
 # Configurações gerais com tema escuro
 st.set_page_config(
@@ -817,7 +816,7 @@ def run_jordao_analysis():
         }
         num_replications = 4
         all_data = []
-        for dose, params in sample_data.items():
+        for dose, params in sample_data.items(): # Corrected: 'sample_data.items()' instead of 'params.items()'
             for param, stats in params.items():
                 for _ in range(num_replications):
                     if distribution_type == 'LogNormal':
@@ -1226,7 +1225,6 @@ def run_jordao_analysis():
         </p>
     </div>
     """, unsafe_allow_html=True)
-
 
 # ===================================================================
 # ROTEADOR PRINCIPAL
