@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import kruskal
 import matplotlib.pyplot as plt
+import seaborn as sns # <--- ADICIONE ESTA LINHA
 
 # Configuração inicial
 st.set_page_config(page_title="Análise de Vermicompostos", layout="wide", page_icon="🪱")
@@ -170,7 +171,8 @@ def main():
         st.write("Esta aplicação permite simular e analisar dados de parâmetros de vermicompostagem.")
         st.write("Comece selecionando um artigo na barra lateral para ver a análise estatística dos dados simulados.")
         st.write("O objetivo é ajudar a interpretar diferenças significativas em parâmetros químicos ao longo do tempo, utilizando testes não paramétricos como o Kruskal-Wallis.")
-        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vermicompost_pile.jpg/640px-Vermicompost_pile.jpg", caption="Exemplo de Vermicompostagem", use_column_width=True)
+        # Correção aqui: use_column_width para use_container_width
+        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vermicompost_pile.jpg/640px-Vermicompost_pile.jpg", caption="Exemplo de Vermicompostagem", use_container_width=True)
 
 
 if __name__ == "__main__":
