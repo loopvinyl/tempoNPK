@@ -68,6 +68,8 @@ def display_results_dermendzhieva():
         st.experimental_rerun() # Recarrega a página para refletir a mudança de estado
 
     st.subheader("Parâmetros Disponíveis:")
+    # Carrega os dados aqui para garantir que df esteja definido no escopo de display_results_dermendzhieva
+    df = load_sample_data_with_stdev(distribution_type='LogNormal') 
     options = df['Parameter'].unique().tolist()
     
     # Pre-seleciona todos os parâmetros para esta análise específica
@@ -77,7 +79,6 @@ def display_results_dermendzhieva():
         return
 
     st.subheader("🔍 Dados Simulados")
-    df = load_sample_data_with_stdev(distribution_type='LogNormal') # Carrega os dados aqui para garantir que df esteja definido
     st.dataframe(df)
 
     st.subheader("📈 Resultados Estatísticos (Teste de Kruskal-Wallis)")
@@ -163,16 +164,16 @@ def main():
         st.write("Esta aplicação permite simular e analisar dados de parâmetros de vermicompostagem.")
         st.write("Selecione um artigo abaixo para ver a análise estatística dos dados simulados.")
         st.write("O objetivo é ajudar a interpretar diferenças significativas em parâmetros químicos ao longo do tempo, utilizando testes não paramétricos como o Kruskal-Wallis.")
-        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vermicompost_pile.jpg/640px-Vermicompost_pile.jpg", caption="Exemplo de Vermicompostagem", use_container_width=True)
-
+        # IMAGEM E TEXTO REMOVIDOS AQUI
+        
         st.markdown("---")
         st.subheader("Selecione um Artigo para Análise:")
-        col1, col2 = st.columns(2) # Cria colunas para os botões
+        col1, col2 = st.columns(2) 
 
         with col1:
             if st.button("📖 Artigo: DERMENDZHIEVA et al. (2021)"):
                 st.session_state['selected_article'] = 'dermendzhieva'
-                st.experimental_rerun() # Recarrega a página para ir para a análise
+                st.experimental_rerun() 
         
         with col2:
             # Exemplo para um futuro artigo (pode adicionar mais colunas ou expandir)
