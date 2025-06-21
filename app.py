@@ -199,7 +199,7 @@ def show_homepage():
         
         if st.button("Selecionar Artigo", key="btn_dermendzhieva"):
             st.session_state['selected_article'] = 'dermendzhieva'
-            st.experimental_rerun()
+            st.rerun()
     
     with col2:
         st.markdown("""
@@ -216,7 +216,7 @@ def show_homepage():
         
         if st.button("Selecionar Artigo", key="btn_jordao"):
             st.session_state['selected_article'] = 'jordao'
-            st.experimental_rerun()
+            st.rerun()
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -487,7 +487,7 @@ def run_dermendzhieva_analysis():
     
     if st.button("← Voltar para seleção de artigos"):
         del st.session_state['selected_article']
-        st.experimental_rerun()
+        st.rerun()
     
     # Painel de configurações (agora na área principal)
     st.markdown("""
@@ -931,7 +931,7 @@ def run_jordao_analysis():
     
     if st.button("← Voltar para seleção de artigos"):
         del st.session_state['selected_article']
-        st.experimental_rerun()
+        st.rerun()
     
     # Carregar dados
     df = load_jordao_sample_data()
