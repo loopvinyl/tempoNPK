@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import kruskal
 import matplotlib.pyplot as plt
-import seaborn as sns # <--- ADICIONE ESTA LINHA
+import seaborn as sns 
 
 # Configuração inicial
 st.set_page_config(page_title="Análise de Vermicompostos", layout="wide", page_icon="🪱")
@@ -34,7 +34,6 @@ def load_sample_data_with_stdev(distribution_type='LogNormal'):
         for day, (mean_orig, std_orig) in days_stats.items():
             if distribution_type == 'LogNormal':
                 # Converte média e desvio padrão para os parâmetros da distribuição log-normal
-                # Evita divisão por zero se std_orig for 0, embora improvável para dados reais
                 if mean_orig <= 0:
                     st.error(f"Média original ({mean_orig}) para {param} no {day} deve ser positiva para LogNormal.")
                     continue
@@ -42,14 +41,13 @@ def load_sample_data_with_stdev(distribution_type='LogNormal'):
                     st.error(f"Desvio padrão original ({std_orig}) para {param} no {day} não pode ser negativo.")
                     continue
                     
-                # Caso o desvio padrão seja zero, a distribuição log-normal degenera para um único valor (a média)
                 if std_orig == 0:
                     values = np.full(num_samples_per_day, mean_orig)
                 else:
                     mu_log = np.log(mean_orig**2 / np.sqrt(std_orig**2 + mean_orig**2))
                     sigma_log = np.sqrt(np.log(1 + (std_orig**2 / mean_orig**2)))
                     values = np.random.lognormal(mu_log, sigma_log, num_samples_per_day)
-            else: # Default para Normal ou outro, embora o foco seja LogNormal aqui
+            else: 
                 values = np.random.normal(mean_orig, std_orig, num_samples_per_day)
 
             for val in values:
@@ -64,7 +62,10 @@ def display_results_dermendzhieva():
     st.header("Análise Estatística - DERMENDZHIEVA et al. (2021) 📚")
     st.write("Esta seção simula a análise dos parâmetros N, P, K, pH e C:N Ratio ao longo do tempo (dias 1, 30, 60, 90, 120) usando dados inspirados no artigo de Dermendzhieva et al. (2021). Os dados são gerados com uma distribuição log-normal e o teste de Kruskal-Wallis é aplicado.")
 
-    df = load_sample_data_with_stdev(distribution_type='LogNormal')
+    # Botão Voltar
+    if st.button("⬅️ Voltar para a Página Inicial"):
+        st.session_state['selected_article'] = None
+        st.experimental_rerun() # Recarrega a página para refletir a mudança de estado
 
     st.subheader("Parâmetros Disponíveis:")
     options = df['Parameter'].unique().tolist()
@@ -76,6 +77,7 @@ def display_results_dermendzhieva():
         return
 
     st.subheader("🔍 Dados Simulados")
+    df = load_sample_data_with_stdev(distribution_type='LogNormal') # Carrega os dados aqui para garantir que df esteja definido
     st.dataframe(df)
 
     st.subheader("📈 Resultados Estatísticos (Teste de Kruskal-Wallis)")
@@ -85,11 +87,10 @@ def display_results_dermendzhieva():
         labels = []
         for treat in df['Treatment'].unique():
             vals = df[(df['Parameter'] == param) & (df['Treatment'] == treat)]['Value'].dropna().values
-            if len(vals) > 1: # Precisa de pelo menos 2 pontos para calcular Kruskal
+            if len(vals) > 1: 
                 param_data.append(vals)
                 labels.append(treat)
         
-        # O teste de Kruskal-Wallis requer pelo menos 2 grupos para comparação
         if len(param_data) >= 2:
             try:
                 h, p = kruskal(*param_data)
@@ -134,15 +135,14 @@ def display_results_dermendzhieva():
 
             # Boxplot para visualizar a distribuição
             sns.boxplot(x='Treatment', y='Value', data=param_df, ax=ax)
-            sns.stripplot(x='Treatment', y='Value', data=param_df, color='black', size=4, jitter=True, ax=ax) # Adiciona pontos individuais
+            sns.stripplot(x='Treatment', y='Value', data=param_df, color='black', size=4, jitter=True, ax=ax) 
             ax.set_title(f'Distribuição de {param} ao Longo do Tempo')
             ax.set_xlabel('Dia de Tratamento')
             ax.set_ylabel(param)
             st.pyplot(fig)
-            plt.close(fig) # Fecha a figura para liberar memória
+            plt.close(fig) 
     else:
         st.info("Nenhum resultado estatístico disponível para os parâmetros selecionados.")
-
 
 # =====================================================
 # Roteamento principal
@@ -151,29 +151,35 @@ def main():
     if 'selected_article' not in st.session_state:
         st.session_state['selected_article'] = None
 
-    st.sidebar.title("Navegação")
-    if st.sidebar.button("Análise DERMENDZHIEVA et al. (2021) 📖"):
-        st.session_state['selected_article'] = 'dermendzhieva'
-    
-    # Espaço para futuros artigos
-    # if st.sidebar.button("Análise ARTIGO_2 (ANO)"):
-    #     st.session_state['selected_article'] = 'artigo_2'
-
     if st.session_state['selected_article'] == 'dermendzhieva':
         display_results_dermendzhieva()
     # elif st.session_state['selected_article'] == 'artigo_2':
     #     # future function for article 2
     #     st.write("Análise para Artigo 2 (em desenvolvimento)...")
     else:
-        st.info("Selecione um artigo para começar a análise.")
+        st.title("📊 Análise Estatística de Parâmetros de Vermicomposto")
         st.markdown("---")
         st.subheader("Bem-vindo à Análise de Vermicompostos! 🪱")
         st.write("Esta aplicação permite simular e analisar dados de parâmetros de vermicompostagem.")
-        st.write("Comece selecionando um artigo na barra lateral para ver a análise estatística dos dados simulados.")
+        st.write("Selecione um artigo abaixo para ver a análise estatística dos dados simulados.")
         st.write("O objetivo é ajudar a interpretar diferenças significativas em parâmetros químicos ao longo do tempo, utilizando testes não paramétricos como o Kruskal-Wallis.")
-        # Correção aqui: use_column_width para use_container_width
         st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vermicompost_pile.jpg/640px-Vermicompost_pile.jpg", caption="Exemplo de Vermicompostagem", use_container_width=True)
 
+        st.markdown("---")
+        st.subheader("Selecione um Artigo para Análise:")
+        col1, col2 = st.columns(2) # Cria colunas para os botões
+
+        with col1:
+            if st.button("📖 Artigo: DERMENDZHIEVA et al. (2021)"):
+                st.session_state['selected_article'] = 'dermendzhieva'
+                st.experimental_rerun() # Recarrega a página para ir para a análise
+        
+        with col2:
+            # Exemplo para um futuro artigo (pode adicionar mais colunas ou expandir)
+            if st.button("📚 Artigo: FUTURO ARTIGO (Em Breve)"):
+                st.warning("Funcionalidade para este artigo ainda não implementada.")
+                # st.session_state['selected_article'] = 'artigo_2'
+                # st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
