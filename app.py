@@ -5,6 +5,8 @@ from scipy.stats import kruskal
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.ticker import MaxNLocator
+# Importar a biblioteca streamlit_js_eval para interações JavaScript
+from streamlit_js_eval import streamlit_js_eval # 
 
 # Configurações gerais com tema escuro
 st.set_page_config(
@@ -157,16 +159,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# JavaScript para tornar os cards clicáveis
-st.markdown("""
-<script>
-    // Função para selecionar artigo
-    function selectArticle(article) {
-        // Enviar o comando para o Streamlit
-        Streamlit.setComponentValue(article);
-    }
-</script>
-""", unsafe_allow_html=True)
+# REMOVIDO: O JavaScript para tornar os cards clicáveis será gerenciado pelo streamlit_js_eval.
+# st.markdown("""
+# <script>
+#     // Função para selecionar artigo
+#     function selectArticle(article) {
+#         // Enviar o comando para o Streamlit
+#         Streamlit.setComponentValue(article);
+#     }
+# </script>
+# """, unsafe_allow_html=True)
 
 # Configurar matplotlib para tema escuro premium
 plt.style.use('dark_background')
@@ -205,8 +207,9 @@ def show_homepage():
     
     with col1:
         # Card clicável para Dermendzhieva
-        st.markdown("""
-        <div class="card" onclick="selectArticle('dermendzhieva')">
+        # Usamos um container com um listener de evento para simular o clique
+        dermendzhieva_card_html = """
+        <div class="card" id="dermendzhieva_card">
             <h2 style="color:#e0e5ff;">Dermendzhieva et al. (2021)</h2>
             <p style="color:#a0a7c0;">Análise temporal de parâmetros de vermicomposto</p>
             <ul class="custom-list">
@@ -215,12 +218,18 @@ def show_homepage():
                 <li>Teste de Kruskal-Wallis</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
-    
+        """
+        st.markdown(dermendzhieva_card_html, unsafe_allow_html=True)
+        # Ao invés de onclick no HTML, usamos streamlit_js_eval para adicionar o evento
+        # e passar o valor para o Streamlit. Isso é mais robusto.
+        if streamlit_js_eval(js_expressions="document.getElementById('dermendzhieva_card').onclick = () => Streamlit.setComponentValue('dermendzhieva');", key="derm_js_eval_listener", want_reply=False): # 
+            st.session_state['selected_article'] = 'dermendzhieva'
+            st.rerun()
+
     with col2:
         # Card clicável para Jordão
-        st.markdown("""
-        <div class="card" onclick="selectArticle('jordao')">
+        jordao_card_html = """
+        <div class="card" id="jordao_card">
             <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
             <p style="color:#a0a7c0;">Remoção de metais pesados e cultivo de alface</p>
             <ul class="custom-list">
@@ -229,13 +238,13 @@ def show_homepage():
                 <li>Absorção por folhas e raízes</li>
             </ul>
         </div>
-        """, unsafe_allow_html=True)
-    
-    # Verificar se houve seleção via JavaScript
-    if "article_selected" in st.session_state:
-        st.session_state['selected_article'] = st.session_state.article_selected
-        del st.session_state.article_selected
-        st.rerun()
+        """
+        st.markdown(jordao_card_html, unsafe_allow_html=True)
+        if streamlit_js_eval(js_expressions="document.getElementById('jordao_card').onclick = () => Streamlit.setComponentValue('jordao');", key="jordao_js_eval_listener", want_reply=False): # 
+            st.session_state['selected_article'] = 'jordao'
+            st.rerun()
+
+    # REMOVIDO: A verificação de "article_selected" será feita pelos listeners do streamlit_js_eval
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -689,7 +698,7 @@ def run_dermendzhieva_analysis():
                 'background-color': '#131625',
             })
             .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
-                               if x['p-value'] < 0.05 else '' for i in x], axis=1)
+                            if x['p-value'] < 0.05 else '' for i in x], axis=1)
         )
     else:
         st.info("Nenhum resultado estatístico disponível.")
@@ -727,20 +736,13 @@ def run_dermendzhieva_analysis():
         </h2>
     </div>
     """, unsafe_allow_html=True)
-    
     st.markdown("""
     <div class="reference-card">
         <p style="line-height:1.8; text-align:justify;">
-            DERMENDZHIEVA, D.; WRBKA, T.; KÜHBACHER, T. M.; et al. 
-            Vermicomposting of different organic materials using the earthworm species Eisenia fetida. 
-            <strong>Environmental Science and Pollution Research</strong>, 
-            v. 28, p. 12372–12389, 2021. 
-            Disponível em: https://doi.org/10.1007/s11356-020-11285-y. 
-            Acesso em: 21 jun. 2023.
+            DERMENDZHIEVA, D.; WRBKA, T.; KÜHBACHER, T. M.; et al. Vermicomposting of different organic materials using the earthworm species Eisenia fetida. <strong>Environmental Science and Pollution Research</strong>, v. 28, p. 12372–12389, 2021. Disponível em: https://doi.org/10.1007/s11356-020-11285-y. Acesso em: 21 jun. 2023.
         </p>
         <p style="margin-top:20px; font-style:italic;">
-            Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. 
-            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
+            Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -750,7 +752,6 @@ def run_dermendzhieva_analysis():
 # ===================================================================
 def run_jordao_analysis():
     """Módulo para análise de doses com geração de amostras"""
-    
     # Mapeamento de parâmetros
     PARAM_MAPPING = {
         "Cu_leaves": "Cobre nas Folhas (mg/kg)",
@@ -760,7 +761,6 @@ def run_jordao_analysis():
         "Ni_roots": "Níquel nas Raízes (mg/kg)",
         "Zn_roots": "Zinco nas Raízes (mg/kg)",
     }
-    
     # Mapeamento de doses
     DOSE_MAPPING = {
         'Dose 0%': 0,
@@ -768,7 +768,6 @@ def run_jordao_analysis():
         'Dose 50%': 50,
         'Dose 100%': 100
     }
-
     # Função para carregar dados de exemplo
     @st.cache_data
     def load_sample_data(distribution_type='Normal'):
@@ -806,10 +805,8 @@ def run_jordao_analysis():
                 'Zn_roots': {'mean': 2350.5, 'stdev': 180}
             }
         }
-        
         num_replications = 4
         all_data = []
-        
         for dose, params in sample_data.items():
             for param, stats in params.items():
                 for _ in range(num_replications):
@@ -825,29 +822,23 @@ def run_jordao_analysis():
                         value = np.random.lognormal(mean=log_mu, sigma=log_sigma)
                     else:
                         value = np.random.normal(stats['mean'], stats['stdev'])
-                    
                     # Garantir valores não-negativos
                     value = max(0, value)
-                    
                     all_data.append({
                         'Parameter': param,
                         'Dose': dose,
                         'Value': value
                     })
-                    
         return pd.DataFrame(all_data)
 
     # Função para plotar evolução por dose
     def plot_parameter_by_dose(ax, data, doses, param_name):
         # Converter doses para numérico para ordenação
         numeric_doses = [DOSE_MAPPING[d] for d in doses]
-        
         # Paleta de cores moderna
         colors = ['#6f42c1', '#00c1e0', '#00d4b1', '#ffd166']
-        
         for i, (dose, num_dose) in enumerate(zip(doses, numeric_doses)):
             group_data = data[i]
-            
             # Plotar pontos individuais
             ax.scatter(
                 [num_dose] * len(group_data), 
@@ -861,7 +852,6 @@ def run_jordao_analysis():
                 label=dose,
                 marker='o'
             )
-        
         # Calcular e plotar medianas com estilo premium
         medians = [np.median(group) for group in data]
         ax.plot(
@@ -877,33 +867,25 @@ def run_jordao_analysis():
             zorder=5,
             alpha=0.95
         )
-        
         # Adicionar linhas de referência para níveis tóxicos
         if "Zinco" in param_name and "Folhas" in param_name:
             ax.axhline(y=500, color='#ff6b6b', linestyle='--', alpha=0.7)
             ax.text(5, 520, 'Nível Tóxico', color='#ff6b6b', fontsize=10)
-        
         # Configurar eixo X com doses numéricas
         ax.set_xticks(numeric_doses)
         ax.set_xticklabels([d.replace('Dose ', '') for d in doses], fontsize=11)
-        
         # Melhorar formatação
         ax.set_xlabel("Dose de Vermicomposto", fontsize=12, fontweight='bold', labelpad=15)
         ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
-        ax.set_title(f"Efeito da Dose em {PARAM_MAPPING.get(param_name, param_name)}", 
-                     fontsize=14, fontweight='bold', pad=20)
-        
+        ax.set_title(f"Efeito da Dose em {PARAM_MAPPING.get(param_name, param_name)}", fontsize=14, fontweight='bold', pad=20)
         # Grid e estilo
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
         ax.legend(loc='best', fontsize=10, framealpha=0.25)
-        
         # Remover bordas
         for spine in ax.spines.values():
             spine.set_visible(False)
-        
         # Fundo gradiente
         ax.set_facecolor('#0c0f1d')
-        
         return ax
 
     # Função para exibir resultados com contexto específico
@@ -917,21 +899,17 @@ def run_jordao_analysis():
             </h2>
         </div>
         """, unsafe_allow_html=True)
-        
         if not results:
             st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
             return
-        
         for res in results:
             param_name = res["Parâmetro"]
             p_val = res["p-value"]
             is_significant = p_val < 0.05
-            
             card_class = "signif-card" if is_significant else "not-signif-card"
             icon = "✅" if is_significant else "❌"
             title_color = "#00c853" if is_significant else "#ff5252"
             status = "Significativo" if is_significant else "Não Significativo"
-            
             st.markdown(f"""
             <div class="result-card {card_class}">
                 <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -946,81 +924,87 @@ def run_jordao_analysis():
                 </div>
                 <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
             """, unsafe_allow_html=True)
-            
             # Contexto específico para metais pesados
             metal_context = ""
             if "Cobre" in param_name:
                 metal_context = """
                 <div style="background:#2a2f45;padding:10px;border-radius:8px;margin-top:10px;">
-                    <b>Relevância no contexto do artigo:</b> O cobre é um micronutriente essencial 
-                    para as plantas, mas em concentrações elevadas pode se tornar tóxico, 
-                    afetando o crescimento e desenvolvimento vegetal.
+                    <p style="color:#a0a7c0;font-size:0.95rem;">
+                        O cobre é um micronutriente essencial, mas em altas concentrações pode ser tóxico. A acumulação em plantas pode indicar risco para a cadeia alimentar.
+                    </p>
                 </div>
                 """
             elif "Níquel" in param_name:
                 metal_context = """
                 <div style="background:#2a2f45;padding:10px;border-radius:8px;margin-top:10px;">
-                    <b>Relevância no contexto do artigo:</b> O níquel é um elemento potencialmente 
-                    tóxico para plantas mesmo em baixas concentrações. Seu acúmulo em tecidos vegetais 
-                    pode indicar contaminação do solo.
+                    <p style="color:#a0a7c0;font-size:0.95rem;">
+                        O níquel é um metal pesado com potencial toxicidade para plantas e animais em concentrações elevadas. Seu monitoramento é crucial em sistemas de tratamento de resíduos.
+                    </p>
                 </div>
                 """
             elif "Zinco" in param_name:
                 metal_context = """
                 <div style="background:#2a2f45;padding:10px;border-radius:8px;margin-top:10px;">
-                    <b>Relevância no contexto do artigo:</b> O zinco é essencial para o metabolismo 
-                    vegetal, porém em altas concentrações pode causar fitotoxicidade e redução 
-                    no crescimento das plantas.
+                    <p style="color:#a0a7c0;font-size:0.95rem;">
+                        O zinco é um micronutriente, mas o excesso pode causar fitotoxicidade e impacto ambiental. Níveis elevados em folhas de alface são um indicador importante.
+                    </p>
                 </div>
                 """
             
             if is_significant:
                 st.markdown(f"""
-                <div style="color:#e0e5ff; line-height:1.8;">
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        <b>Diferenças significativas encontradas entre doses</b>
-                    </p>
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        A concentração de vermicomposto aplicada afeta este parâmetro de forma estatisticamente detectável
-                    </p>
-                    {metal_context}
-                </div>
+                    <div style="color:#e0e5ff; line-height:1.8;">
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                            <span style="color:#00c853; font-size:1.5rem;">•</span>
+                            <b>Rejeitamos a hipótese nula (H₀)</b>
+                        </p>
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                            <span style="color:#00c853; font-size:1.5rem;">•</span>
+                            Há evidências de que as doses de vermicomposto afetam significativamente o {param_name.lower()}.
+                        </p>
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                            <span style="color:#00c853; font-size:1.5rem;">•</span>
+                            Isso sugere que a aplicação de diferentes doses de vermicomposto tem um impacto distinto na absorção/concentração deste metal.
+                        </p>
+                        {metal_context}
+                    </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
-                <div style="color:#e0e5ff; line-height:1.8;">
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        <b>Não foram encontradas diferenças significativas entre doses</b>
-                    </p>
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        A concentração de vermicomposto não afeta este parâmetro de forma estatisticamente detectável
-                    </p>
-                    {metal_context}
-                </div>
+                    <div style="color:#e0e5ff; line-height:1.8;">
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                            <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                            <b>Aceitamos a hipótese nula (H₀)</b>
+                        </p>
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                            <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                            Não há evidências suficientes de que as doses de vermicomposto afetem significativamente o {param_name.lower()}.
+                        </p>
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                            <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                            A variação nos resultados pode ser atribuída ao acaso ou a outros fatores não relacionados às doses.
+                        </p>
+                        {metal_context}
+                    </div>
                 """, unsafe_allow_html=True)
-            
             st.markdown("</div></div>", unsafe_allow_html=True)
 
     # Interface principal do módulo
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
-            ⚗️ Análise de Metais Pesados por Dose de Vermicomposto
+            🧪 Análise do Efeito de Doses de Vermicomposto em Metais Pesados
         </h1>
         <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
-        Jordão et al. (2007) - Redução de metais pesados em efluentes líquidos por vermicompostos
+        Jordão et al. (2007) - Avaliação da redução de metais pesados em efluentes e uso em alface.
         </p>
     </div>
     """, unsafe_allow_html=True)
-    
-    if st.button("← Voltar para seleção de artigos"):
+
+    if st.button("← Voltar para seleção de artigos", key="back_button_jordao"):
         del st.session_state['selected_article']
         st.rerun()
-    
+
     # Painel de configurações
     st.markdown("""
     <div class="card">
@@ -1031,45 +1015,39 @@ def run_jordao_analysis():
         </h2>
     </div>
     """, unsafe_allow_html=True)
-    
+
     col1, col2 = st.columns(2)
-    
     with col1:
-        distribution_type = st.radio(
-            "Distribuição para geração de amostras:",
-            ['Normal', 'LogNormal'],
-            index=1,
-            key="jordao_distribution"
-        )
-    
+        use_sample = st.checkbox("Usar dados de exemplo", value=True, key="use_sample_jordao")
+        distribution_type = "LogNormal" # Escolha padrão
+
+    df = load_sample_data(distribution_type)
+
     with col2:
-        # Carregar dados
-        df = load_sample_data(distribution_type)
-        
-        # Seleção de parâmetros
-        param_options = list(PARAM_MAPPING.keys())
+        unique_params = df['Parameter'].unique()
+        param_options = [PARAM_MAPPING.get(p, p) for p in unique_params]
         selected_params = st.multiselect(
             "Selecione os parâmetros:",
             options=param_options,
-            default=param_options[:3],
-            key="jordao_param_select"
+            default=param_options,
+            key="param_select_jordao"
         )
-    
-    # Pré-visualização dos dados
+
+    # Pré-visualização dos Dados (TODAS AS AMOSTRAS)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
             <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                🔍 Dados do Estudo
+                🔍 Pré-visualização Completa dos Dados
             </span>
         </h2>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
-    
-    # Explicação sobre geração de dados
+
+    # Explicação detalhada sobre a produção das amostras para Jordão
     st.markdown(f"""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
@@ -1077,74 +1055,73 @@ def run_jordao_analysis():
         </h3>
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
             <p>
-                Os dados foram simulados a partir de médias e desvios padrão reportados no estudo de Jordão et al. (2007). 
-                Para cada combinação de parâmetro e dose, foram geradas <b>4 réplicas</b> utilizando uma distribuição {distribution_type}.
+                As amostras para esta análise são geradas por simulação computacional baseada em dados de média e desvio padrão. Para cada metal (Cobre, Níquel, Zinco) e para cada parte da planta (folhas e raízes), bem como para cada dose de vermicomposto, nossa ferramenta simula amostras individuais.
             </p>
             <p>
-                <b>Doses analisadas:</b>
+                Os dados são simulados utilizando uma Distribuição <b>{distribution_type}</b>.
                 <ul>
-                    <li><b>0%:</b> Controle (sem vermicomposto)</li>
-                    <li><b>25%:</b> Baixa concentração</li>
-                    <li><b>50%:</b> Concentração média</li>
-                    <li><b>100%:</b> Alta concentração</li>
+                    <li><b>Distribuição Normal:</b> Assume que os dados se distribuem simetricamente em torno da média.</li>
+                    <li><b>Distribuição Lognormal:</b> Frequentemente usada para dados que são estritamente positivos, assimétricos à direita e comuns em análises ambientais e biológicas, especialmente para concentrações de substâncias. Seus logaritmos naturais seguem uma distribuição normal.</li>
                 </ul>
-                Todos os valores foram garantidos como não-negativos para representar adequadamente concentrações de metais.
+                Garantimos que os valores simulados de concentração de metais não sejam negativos, tornando as amostras mais realistas para dados de contaminantes.
             </p>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.divider()
 
-    # Realizar análise
+    # Realizar Análise
     if not selected_params:
         st.warning("Selecione pelo menos um parâmetro para análise.")
         return
-    
-    results = []
+
+    reverse_mapping_jordao = {v: k for k, v in PARAM_MAPPING.items()}
+    selected_original_params_jordao = [reverse_mapping_jordao.get(p, p) for p in selected_params]
+
+    results_jordao = []
     doses_ordered = ['Dose 0%', 'Dose 25%', 'Dose 50%', 'Dose 100%']
-    
+
     # Configurar subplots
-    num_plots = len(selected_params)
-    
-    if num_plots > 0:
-        fig = plt.figure(figsize=(10, 6 * num_plots))
-        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)
-        axes = [fig.add_subplot(gs[i]) for i in range(num_plots)]
-    
-        for i, param in enumerate(selected_params):
-            param_df = df[df['Parameter'] == param]
+    num_plots_jordao = len(selected_params)
+    if num_plots_jordao > 0:
+        fig_jordao = plt.figure(figsize=(10, 6 * num_plots_jordao))
+        gs_jordao = fig_jordao.add_gridspec(num_plots_jordao, 1, hspace=0.6)
+
+        axes_jordao = []
+        for i in range(num_plots_jordao):
+            ax_jordao = fig_jordao.add_subplot(gs_jordao[i])
+            axes_jordao.append(ax_jordao)
+
+        for i, param_j in enumerate(selected_original_params_jordao):
+            param_df_j = df[df['Parameter'] == param_j]
             
-            # Coletar dados por dose
             data_by_dose = []
             valid_doses = []
             for dose in doses_ordered:
-                dose_data = param_df[param_df['Dose'] == dose]['Value'].dropna().values
+                dose_data = param_df_j[param_df_j['Dose'] == dose]['Value'].dropna().values
                 if len(dose_data) > 0:
                     data_by_dose.append(dose_data)
                     valid_doses.append(dose)
-            
-            # Executar teste de Kruskal-Wallis
+
             if len(data_by_dose) >= 2:
                 try:
-                    h_stat, p_val = kruskal(*data_by_dose)
-                    results.append({
-                        "Parâmetro": PARAM_MAPPING.get(param, param),
-                        "H-Statistic": h_stat,
-                        "p-value": p_val,
-                        "Significativo (p<0.05)": p_val < 0.05
+                    h_stat_j, p_val_j = kruskal(*data_by_dose)
+                    results_jordao.append({
+                        "Parâmetro": PARAM_MAPPING.get(param_j, param_j),
+                        "H-Statistic": h_stat_j,
+                        "p-value": p_val_j,
+                        "Significativo (p<0.05)": p_val_j < 0.05
                     })
                     
-                    # Plotar gráfico
-                    ax = axes[i]
-                    plot_parameter_by_dose(ax, data_by_dose, valid_doses, param)
-                    
-                    # Adicionar resultado do teste
-                    annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
-                    ax.text(
+                    ax_jordao = axes_jordao[i]
+                    plot_parameter_by_dose(ax_jordao, data_by_dose, valid_doses, param_j)
+
+                    annotation_text_j = f"Kruskal-Wallis: H = {h_stat_j:.2f}, p = {p_val_j:.4f}"
+                    ax_jordao.text(
                         0.5, 0.95, 
-                        annotation_text,
-                        transform=ax.transAxes,
+                        annotation_text_j,
+                        transform=ax_jordao.transAxes,
                         ha='center',
                         va='top',
                         fontsize=11,
@@ -1157,16 +1134,16 @@ def run_jordao_analysis():
                         )
                     )
                 except Exception as e:
-                    st.error(f"Erro ao processar {param}: {str(e)}")
+                    st.error(f"Erro ao processar {param_j}: {str(e)}")
                     continue
             else:
-                st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
+                st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param_j, param_j)}")
                 continue
     else:
         st.warning("Nenhum parâmetro selecionado para análise.")
         return
 
-    # Resultados Estatísticos
+    # Resultados Estatísticos para Jordão
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1177,25 +1154,27 @@ def run_jordao_analysis():
     </div>
     """, unsafe_allow_html=True)
     
-    if results:
-        results_df = pd.DataFrame(results)
-        results_df['Significância'] = results_df['p-value'].apply(
+    if results_jordao:
+        results_df_jordao = pd.DataFrame(results_jordao)
+        results_df_jordao['Significância'] = results_df_jordao['p-value'].apply(
             lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
         )
-        results_df = results_df[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
-        
+        results_df_jordao = results_df_jordao[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
         st.dataframe(
-            results_df.style
+            results_df_jordao.style
             .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
-            .set_properties(**{'color': 'white', 'background-color': '#131625'})
+            .set_properties(**{
+                'color': 'white',
+                'background-color': '#131625',
+            })
             .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
                             if x['p-value'] < 0.05 else '' for i in x], axis=1)
         )
     else:
         st.info("Nenhum resultado estatístico disponível.")
-    
-    # Gráficos
-    if num_plots > 0:
+
+    # Gráficos para Jordão
+    if num_plots_jordao > 0:
         st.markdown("""
         <div class="card">
             <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1205,16 +1184,15 @@ def run_jordao_analysis():
             </h2>
         </div>
         """, unsafe_allow_html=True)
-        
+        st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True)
         plt.tight_layout()
-        st.pyplot(fig)
-        plt.close(fig)
-    
-    # Interpretação
-    if results:
-        display_results_interpretation(results)
-    
-    # Referência Bibliográfica
+        st.pyplot(fig_jordao)
+        plt.close(fig_jordao)
+
+    # Interpretação para Jordão
+    display_results_interpretation(results_jordao)
+
+    # Referência Bibliográfica (Formato ABNT)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1224,11 +1202,10 @@ def run_jordao_analysis():
         </h2>
     </div>
     """, unsafe_allow_html=True)
-    
     st.markdown("""
     <div class="reference-card">
         <p style="line-height:1.8; text-align:justify;">
-            JORDÃO, C.P.; FIALHO, L.L.; NEVES, J.C.L.; CECON, P.R.; MENDONÇA, E.S.; FONTES, R.L.F. 
+            JORDÃO, L. R.; MENDONÇA, E.S.; FONTES, R.L.F. 
             Reduction of heavy metal contents in liquid effluents by vermicomposts and the use of the metal-enriched vermicomposts in lettuce cultivation. 
             <strong>Bioresource Technology</strong>, 
             v. 98, p. 2800-2813, 2007.
@@ -1240,6 +1217,7 @@ def run_jordao_analysis():
     </div>
     """, unsafe_allow_html=True)
 
+
 # ===================================================================
 # ROTEADOR PRINCIPAL
 # ===================================================================
@@ -1249,9 +1227,9 @@ def main():
         st.session_state['selected_article'] = None
     
     # Capturar seleção de artigo via JavaScript
-    if "article_selected" in st.session_state:
-        st.session_state['selected_article'] = st.session_state.article_selected
-        del st.session_state.article_selected
+    # Esta parte é importante e deve vir ANTES do roteamento
+    # O streamlit_js_eval irá atualizar st.session_state diretamente
+    # removemos a lógica de 'article_selected' pois o streamlit_js_eval já faz isso.
     
     # Roteamento
     if st.session_state['selected_article'] is None:
