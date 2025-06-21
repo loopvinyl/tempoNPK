@@ -282,25 +282,25 @@ def show_homepage():
                 st.session_state['selected_article'] = 'sharma'
                 st.rerun()
 
-    # Novo card para o artigo de Antonio Aguilar-Garrido et al. (2023)
+    # Novo card para o artigo de Mago et al. (2021)
     st.markdown("""
     <div class="card-container">
         <div class="card">
-            <h2 style="color:#e0e5ff;">Aguilar-Garrido et al. (2023)</h2>
-            <p style="color:#a0a7c0;">Potencial de remediação de resíduos contra drenagem ácida de mina (AMD)</p>
+            <h2 style="color:#e0e5ff;">Mago et al. (2021)</h2>
+            <p style="color:#a0a7c0;">Gestão de biomassa de resíduos de cultura de banana via vermicompostagem</p>
             <ul class="custom-list">
-                <li>Avaliação de diversos resíduos (incluindo vermicomposto)</li>
-                <li>Eficácia na retenção de Elementos Potencialmente Tóxicos (PTE)</li>
+                <li>Análise de parâmetros físico-químicos do vermicomposto final</li>
+                <li>Diferentes proporções de resíduos de folha de bananeira e esterco de vaca</li>
                 <li>Teste de Kruskal-Wallis</li>
             </ul>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    if st.button("Selecionar Aguilar-Garrido", key="btn_aguilargarrido", 
+    if st.button("Selecionar Mago", key="btn_mago", 
                  help="Clique para selecionar este artigo",
                  use_container_width=True,
                  type="primary"):
-        st.session_state['selected_article'] = 'aguilar_garrido'
+        st.session_state['selected_article'] = 'mago'
         st.rerun()
 
 # ===================================================================
@@ -1824,110 +1824,82 @@ def run_sharma_analysis():
     """, unsafe_allow_html=True)
 
 # ===================================================================
-# MÓDULO AGUILAR-GARRIDO ET AL. (2023) - ANÁLISE DE RETENÇÃO DE PTE
+# MÓDULO MAGO ET AL. (2021) - ANÁLISE DE PARÂMETROS FÍSICO-QUÍMICOS DO VERMICOMPOSTO FINAL
 # ===================================================================
-def run_aguilar_garrido_analysis():
-    """Módulo para análise da eficácia de retenção de PTE (Aguilar-Garrido et al., 2023)"""
+def run_mago_analysis():
+    """Módulo para análise de parâmetros físico-químicos do vermicomposto final (Mago et al., 2021)"""
 
-    # Mapeamento de elementos para exibição na UI
+    # Mapeamento de parâmetros para exibição na UI
     PARAM_MAPPING = {
-        "As": "Arsênio (As) (%)",
-        "Cd": "Cádmio (Cd) (%)",
-        "Co": "Cobalto (Co) (%)",
-        "Cr": "Cromo (Cr) (%)",
-        "Cu": "Cobre (Cu) (%)",
-        "Ni": "Níquel (Ni) (%)",
-        "Pb": "Chumbo (Pb) (%)",
-        "Zn": "Zinco (Zn) (%)",
-        "Mn": "Manganês (Mn) (%)",
+        "PH": "pH",
+        "EC": "Condutividade Elétrica (mS/cm)",
+        "OM": "Matéria Orgânica (g/kg)",
+        "TOC": "Carbono Orgânico Total (g/kg)",
+        "TKN": "Nitrogênio Total Kjeldahl (g/kg)",
+        "TAP": "Fósforo Total Disponível (g/kg)",
+        "TK": "Potássio Total (g/kg)",
     }
 
-    # Dados da Tabela 4 do artigo (Retention effectiveness of potentially toxic elements (PTE) in %)
-    # Média e desvio padrão fornecidos diretamente.
-    PTE_RETENTION_DATA = {
-        "As": {
-            "IO": (99.96, 0.01), "MS": (99.53, 0.27), "CW": (99.74, 0.07),
-            "GS": (99.87, 0.04), "WS": (69.56, 6.98), "BM": (46.95, 3.49),
-            "VC": (99.67, 0.01), "OW": (88.13, 3.68), "OL": (81.72, 3.04),
-            "GW": (77.20, 2.92)
+    # Dados do vermicomposto final da Tabela 3 (Mean ± SEM, n=3)
+    VERMICOMPOST_FINAL_DATA = {
+        "PH": {
+            "VR1": (7.3, 0.15), "VR2": (7.1, 0.12), "VR3": (7.1, 0.12),
+            "VR4": (7.2, 0.11), "VR5": (7.3, 0.15)
         },
-        "Cd": {
-            "IO": (98.91, 0.04), "MS": (99.28, 0.02), "CW": (99.68, 0.02),
-            "GS": (95.82, 0.51), "WS": (97.44, 0.30), "BM": (75.12, 0.73),
-            "VC": (98.54, 0.07), "OW": (98.26, 0.29), "OL": (94.85, 0.30),
-            "GW": (89.65, 0.72)
+        "EC": {
+            "VR1": (1.70, 0.02), "VR2": (1.81, 0.01), "VR3": (1.81, 0.02),
+            "VR4": (1.87, 0.02), "VR5": (1.88, 0.02)
         },
-        "Co": {
-            "IO": (98.80, 0.02), "MS": (64.25, 0.69), "CW": (95.49, 0.22),
-            "GS": (38.20, 6.54), "WS": (83.57, 0.84), "BM": (39.48, 2.45),
-            "VC": (95.17, 0.59), "OW": (93.35, 0.33), "OL": (86.96, 0.47),
-            "GW": (79.95, 2.37)
+        "OM": {
+            "VR1": (292, 1.48), "VR2": (285, 0.85), "VR3": (284, 0.84),
+            "VR4": (338.168, None), # Aprox. de 338.168, sem desvio padrao explicito
+            "VR5": (427, 1.42)
         },
-        "Cr": {
-            "IO": (100.00, 0.00), "MS": (100.00, 0.00), "CW": (100.00, 0.00),
-            "GS": (100.00, 0.00), "WS": (83.52, 2.65), "BM": (16.57, 4.36),
-            "VC": (100.00, 0.00), "OW": (87.72, 3.60), "OL": (85.88, 1.63),
-            "GW": (85.88, 1.63) # Assuming GW = OL for this parameter as per table values
+        "TOC": {
+            "VR1": (169, 1.52), "VR2": (165.3, 0.88), "VR3": (164.7, 0.88),
+            "VR4": (196, 1.52), "VR5": (248.6, 0.88)
         },
-        "Cu": {
-            "IO": (99.93, 0.01), "MS": (99.46, 0.03), "CW": (98.45, 0.01),
-            "GS": (99.56, 0.05), "WS": (92.49, 0.38), "BM": (67.12, 0.90),
-            "VC": (99.82, 0.01), "OW": (95.73, 0.48), "OL": (90.04, 0.60),
-            "GW": (78.79, 2.42)
+        "TKN": {
+            "VR1": (16.8, 0.31), "VR2": (18.6, 0.20), "VR3": (17.7, 0.12),
+            "VR4": (13.8, 0.14), "VR5": (10.2, 0.15)
         },
-        "Ni": {
-            "IO": (85.30, 0.16), "MS": (62.98, 0.76), "CW": (74.74, 0.54),
-            "GS": (19.98, 17.38), "WS": (87.42, 1.24), "BM": (69.88, 0.94),
-            "VC": (47.79, 1.65), "OW": (47.76, 6.51), "OL": (47.76, 6.51), # Assuming OL = OW for this
-            "GW": (47.76, 6.51) # Assuming GW = OW for this
+        "TAP": {
+            "VR1": (9.8, 0.18), "VR2": (9.6, 0.12), "VR3": (9.3, 0.02),
+            "VR4": (8.26, 0.02), "VR5": (7.23, 0.20)
         },
-        "Pb": {
-            "IO": (100.00, 0.00), "MS": (99.97, 0.05), "CW": (100.00, 0.00),
-            "GS": (100.00, 0.00), "WS": (93.19, 4.65), "BM": (82.18, 1.30),
-            "VC": (99.93, 0.01), "OW": (94.51, 1.83), "OL": (90.90, 1.46),
-            "GW": (91.41, 1.38)
+        "TK": {
+            "VR1": (9.5, 0.11), "VR2": (9.8, 0.14), "VR3": (9.45, 0.12),
+            "VR4": (8.26, 0.20), "VR5": (7.13, 0.12)
         },
-        "Zn": {
-            "IO": (99.22, 0.05), "MS": (93.63, 0.13), "CW": (99.86, 0.01),
-            "GS": (92.87, 0.64), "WS": (95.17, 0.83), "BM": (64.01, 1.57),
-            "VC": (97.92, 0.19), "OW": (97.96, 0.39), "OL": (95.09, 0.36),
-            "GW": (91.09, 0.74)
-        },
-        "Mn": {
-            "IO": (98.02, 0.16), "MS": (78.43, 0.30), "CW": (94.28, 0.30),
-            "GS": (73.12, 11.73), # GS has no stdev, using a reasonable estimate
-            "WS": (73.12, 11.73), # No data, using GS's for simulation purposes
-            "BM": (71.64, 2.50),
-            "VC": (75.19, 0.67),
-            "OW": (70.43, 1.03),
-            "OL": (69.54, 2.83),
-            "GW": (69.54, 2.83) # No data, using OL's for simulation purposes
-        }
     }
 
-    # Descrições dos materiais de resíduo
+    # Descrições dos vermireatores (proporções CD:BL)
     TREATMENT_DESCRIPTIONS = {
-        "IO": "Lodo seco rico em oxihidróxidos de ferro",
-        "MS": "Lodo seco de mármore",
-        "CW": "Resíduo carbonatado de exploração de turfa",
-        "GS": "Estéril de mineração de gesso",
-        "WS": "Lodo de esgoto compostado",
-        "BM": "Material bioestabilizado de resíduos sólidos urbanos",
-        "VC": "Vermicomposto de poda e jardinagem",
-        "OW": "Subproduto sólido de lagar de azeite compostado (água potável)",
-        "OL": "Subproduto sólido de lagar de azeite compostado (lixiviados)",
-        "GW": "Resíduo de planta de estufa compostado"
+        "VR1": "100% Esterco de Vaca (CD)",
+        "VR2": "80% CD : 20% Folha de Banana (BL)",
+        "VR3": "60% CD : 40% BL",
+        "VR4": "40% CD : 60% BL",
+        "VR5": "20% CD : 80% BL"
     }
 
     @st.cache_data
-    def load_aguilar_garrido_data(num_replications=3): # Artigo menciona "in triplicate"
+    def load_mago_data(num_replications=3): # N=30 no artigo, mas indica n=3 para as médias.
         all_data = []
-        for param, treatments_data in PTE_RETENTION_DATA.items():
+        for param, treatments_data in VERMICOMPOST_FINAL_DATA.items():
             for treatment, (mean, stdev) in treatments_data.items():
                 for _ in range(num_replications):
-                    value = np.random.normal(mean, stdev)
-                    # Garantir que a porcentagem esteja entre 0 e 100
-                    value = np.clip(value, 0.0, 100.0)
+                    # Usar o desvio padrão fornecido, ou estimar um pequeno se for None
+                    if stdev is None:
+                        # Estimar um pequeno desvio padrão se não for fornecido
+                        # Por exemplo, 1% da média ou um valor fixo pequeno
+                        sim_stdev = mean * 0.01 if mean != 0 else 0.01
+                    else:
+                        sim_stdev = stdev
+                    
+                    value = np.random.normal(mean, sim_stdev)
+                    
+                    # Garantir valores não-negativos para concentrações
+                    value = max(0.0, value)
                     
                     all_data.append({
                         "Parameter": param,
@@ -1936,11 +1908,9 @@ def run_aguilar_garrido_analysis():
                     })
         return pd.DataFrame(all_data)
 
-    def plot_retention_effectiveness(ax, data, treatments, param_name):
-        # Gerar cores distintas para cada tratamento
-        colors = plt.cm.get_cmap('tab20', len(treatments)).colors
+    def plot_mago_parameters(ax, data, treatments, param_name):
+        colors = plt.cm.get_cmap('viridis', len(treatments)).colors
         
-        # Mapear tratamentos para índices numéricos para plotagem
         numeric_treatments = np.arange(len(treatments))
         
         for i, treatment in enumerate(treatments):
@@ -1959,7 +1929,6 @@ def run_aguilar_garrido_analysis():
                 marker='o'
             )
             
-            # Plotar média e intervalo de confiança
             mean_val = np.mean(group_data)
             std_val = np.std(group_data)
             
@@ -1977,16 +1946,16 @@ def run_aguilar_garrido_analysis():
             )
         
         ax.set_xticks(numeric_treatments)
-        # Usar uma versão mais curta dos rótulos dos tratamentos para o eixo X
+        # Usar rótulos simplificados (VR1, VR2, etc.) para o eixo X
         ax.set_xticklabels([t for t in treatments], rotation=45, ha="right", fontsize=9)
         
-        ax.set_xlabel("Tipo de Resíduo", fontsize=12, fontweight='bold', labelpad=15)
+        ax.set_xlabel("Vermireator (Proporção CD:BL)", fontsize=12, fontweight='bold', labelpad=15)
         ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
-        ax.set_title(f"Eficácia de Retenção de {PARAM_MAPPING.get(param_name, param_name)}", 
+        ax.set_title(f"Comparação de {PARAM_MAPPING.get(param_name, param_name)} no Vermicomposto Final", 
                      fontsize=14, fontweight='bold', pad=20)
         
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        ax.legend(loc='lower right', fontsize=8, framealpha=0.25, bbox_to_anchor=(1.05, 0.0)) # Ajuste da localização da legenda
+        ax.legend(loc='lower right', fontsize=8, framealpha=0.25, bbox_to_anchor=(1.05, 0.0))
         
         for spine in ax.spines.values():
             spine.set_visible(False)
@@ -1995,12 +1964,12 @@ def run_aguilar_garrido_analysis():
         
         return ax
 
-    def display_aguilar_garrido_interpretation(results):
+    def display_mago_interpretation(results):
         st.markdown("""
         <div class="card">
             <h2 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📝 Interpretação dos Resultados - Aguilar-Garrido et al. (2023)
+                    📝 Interpretação dos Resultados - Mago et al. (2021)
                 </span>
             </h2>
         </div>
@@ -2040,15 +2009,15 @@ def run_aguilar_garrido_analysis():
                 <div style="color:#e0e5ff; line-height:1.8;">
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                         <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        <b>Diferenças significativas na eficácia de retenção entre os materiais de resíduo.</b>
+                        <b>Diferenças significativas encontradas entre os tratamentos.</b>
                     </p>
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                         <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        A natureza do resíduo (inorgânico, orgânico, vermicomposto) influencia a capacidade de reter este PTE.
+                        A proporção de folha de banana e esterco de vaca influencia significativamente este parâmetro no vermicomposto final.
                     </p>
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                         <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        Resíduos inorgânicos (IO, MS, CW) e o vermicomposto (VC) geralmente demonstraram maior eficácia.
+                        Isso sugere que a formulação da mistura inicial é crucial para a qualidade final do vermicomposto.
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -2057,25 +2026,25 @@ def run_aguilar_garrido_analysis():
                 <div style="color:#e0e5ff; line-height:1.8;">
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                         <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        <b>Não foram encontradas diferenças significativas na eficácia de retenção.</b>
+                        <b>Não foram encontradas diferenças significativas entre os tratamentos.</b>
                     </p>
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                         <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        A capacidade de retenção para este PTE é similar entre os tipos de resíduos avaliados.
+                        A proporção de folha de banana e esterco de vaca não afeta significativamente este parâmetro no vermicomposto final.
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
             
             st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # Interface principal do módulo Aguilar-Garrido
+    # Interface principal do módulo Mago et al. (2021)
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
-            🧪 Potencial de Remediação de Resíduos contra Drenagem Ácida de Mina
+            🍌 Análise de Parâmetros Físico-Químicos do Vermicomposto Final
         </h1>
         <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
-        Aguilar-Garrido et al. (2023) - Avaliação da eficácia de retenção de Elementos Potencialmente Tóxicos (PTE)
+        Mago et al. (2021) - Gestão de biomassa de resíduos de cultura de banana via vermicompostagem
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -2097,24 +2066,24 @@ def run_aguilar_garrido_analysis():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.write("Os dados são carregados diretamente da Tabela 4 do artigo.")
+        st.write("Os dados são carregados e simulados a partir da Tabela 3 do artigo.")
     
     with col2:
         param_options = list(PARAM_MAPPING.values())
         selected_params = st.multiselect(
-            "Selecione os elementos para análise (PTEs):",
+            "Selecione os parâmetros para análise:",
             options=param_options,
-            default=param_options[:5],
-            key="aguilar_garrido_param_select"
+            default=param_options, # Seleciona todos por padrão
+            key="mago_param_select"
         )
     
-    df = load_aguilar_garrido_data()
+    df = load_mago_data()
 
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
             <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                🔍 Dados do Estudo (Eficácia de Retenção de PTEs)
+                🔍 Dados do Estudo (Vermicomposto Final)
             </span>
         </h2>
     </div>
@@ -2130,26 +2099,24 @@ def run_aguilar_garrido_analysis():
         </h3>
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
             <p>
-                Os dados para esta análise foram extraídos da Tabela 4 do artigo de Aguilar-Garrido et al. (2023), que apresenta a eficácia de retenção de Elementos Potencialmente Tóxicos (PTEs) por diferentes materiais de resíduos. Para permitir a análise estatística, foram simuladas <b>3 réplicas</b> para cada valor médio de elemento e tratamento, utilizando uma distribuição normal com base nos desvios padrão fornecidos. Os valores simulados foram limitados entre 0% e 100% para representar porcentagens de forma realista.
+                Os dados para esta análise foram extraídos da seção "Final vermicompost" da Tabela 3 do artigo de Mago et al. (2021). 
+                Para permitir a análise estatística, foram simuladas <b>3 réplicas</b> para cada valor médio de parâmetro e tratamento, 
+                utilizando uma distribuição normal com base nos desvios padrão fornecidos. Nos casos onde o desvio padrão não foi 
+                explicitamente dado, foi estimado um pequeno valor para permitir a simulação.
             </p>
             <p>
-                <b>Materiais de Resíduos Analisados:</b>
+                <b>Tratamentos analisados (Proporções Esterco de Vaca (CD) : Folha de Banana (BL)):</b>
                 <ul>
-                    <li><b>IO:</b> Lodo seco rico em oxihidróxidos de ferro (Mineração)</li>
-                    <li><b>MS:</b> Lodo seco de mármore (Mineração)</li>
-                    <li><b>CW:</b> Resíduo carbonatado de exploração de turfa (Mineração)</li>
-                    <li><b>GS:</b> Estéril de mineração de gesso (Mineração)</li>
-                    <li><b>WS:</b> Lodo de esgoto compostado (Urbano)</li>
-                    <li><b>BM:</b> Material bioestabilizado de resíduos sólidos urbanos (Urbano)</li>
-                    <li><b>VC:</b> Vermicomposto de poda e jardinagem (Agroindustrial/Urbano)</li>
-                    <li><b>OW:</b> Subproduto sólido de lagar de azeite compostado (água potável) (Agroindustrial)</li>
-                    <li><b>OL:</b> Subproduto sólido de lagar de azeite compostado (lixiviados) (Agroindustrial)</li>
-                    <li><b>GW:</b> Resíduo de planta de estufa compostado (Agroindustrial)</li>
+                    <li><b>VR1:</b> 100% CD : 0% BL</li>
+                    <li><b>VR2:</b> 80% CD : 20% BL</li>
+                    <li><b>VR3:</b> 60% CD : 40% BL</li>
+                    <li><b>VR4:</b> 40% CD : 60% BL</li>
+                    <li><b>VR5:</b> 20% CD : 80% BL</li>
                 </ul>
             </p>
             <p>
                 O teste de Kruskal-Wallis foi aplicado para verificar se existem diferenças significativas 
-                na eficácia de retenção de cada PTE entre os diferentes materiais de resíduos.
+                nos parâmetros físico-químicos do vermicomposto final entre os diferentes tratamentos.
             </p>
         </div>
     </div>
@@ -2159,7 +2126,7 @@ def run_aguilar_garrido_analysis():
 
     # Realizar Análise
     if not selected_params:
-        st.warning("Selecione pelo menos um elemento para análise.")
+        st.warning("Selecione pelo menos um parâmetro para análise.")
         return
 
     reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
@@ -2200,7 +2167,7 @@ def run_aguilar_garrido_analysis():
                     })
                     
                     ax = axes[i]
-                    plot_retention_effectiveness(ax, data_by_treatment, treatments_ordered, param)
+                    plot_mago_parameters(ax, data_by_treatment, treatments_ordered, param)
                     
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
                     ax.text(
@@ -2225,7 +2192,7 @@ def run_aguilar_garrido_analysis():
                 st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)} para realizar o teste de Kruskal-Wallis.")
                 # Ainda pode plotar se desejar, mas não terá resultado estatístico
                 ax = axes[i]
-                plot_retention_effectiveness(ax, data_by_treatment, treatments_ordered, param)
+                plot_mago_parameters(ax, data_by_treatment, treatments_ordered, param)
     
     st.markdown("""
     <div class="card">
@@ -2262,7 +2229,7 @@ def run_aguilar_garrido_analysis():
         <div class="card">
             <h2 style="display:flex;align-items:center;gap:10px;">
                 <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📊 Eficácia de Retenção de Elementos Potencialmente Tóxicos (PTEs)
+                    📊 Comparação de Parâmetros do Vermicomposto Final
                 </span>
             </h2>
         </div>
@@ -2272,7 +2239,7 @@ def run_aguilar_garrido_analysis():
         st.pyplot(fig)
         plt.close(fig)
     
-    display_aguilar_garrido_interpretation(results)
+    display_mago_interpretation(results)
 
     st.markdown("""
     <div class="card">
@@ -2287,14 +2254,13 @@ def run_aguilar_garrido_analysis():
     st.markdown("""
     <div class="reference-card">
         <p style="line-height:1.8; text-align:justify;">
-            AGUILAR-GARRIDO, A.; PANIAGUA-LÓPEZ, M.; SIERRA-ARAGÓN, M.; 
-            MARTÍNEZ GARZÓN, F. J.; MARTÍN-PEINADO, F. J. 
-            Remediation potential of mining, agro-industrial, and urban wastes against acid mine drainage. 
-            <strong>Scientific Reports</strong>, 
-            v. 13, n. 1, p. 12120, 2023.
+            MAGO, M.; YADAV, A.; GUPTA, R.; GARG, V. K. 
+            Management of banana crop waste biomass using vermicomposting technology. 
+            <strong>Bioresource Technology</strong>, 
+            v. 326, p. 124742, 2021.
         </p>
         <p style="margin-top:10px;">
-            <strong>DOI:</strong> 10.1038/s41598-023-39266-4
+            <strong>DOI:</strong> 10.1016/j.biortech.2021.124742
         </p>
         <p style="margin-top:15px; font-style:italic;">
             Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. 
@@ -2302,7 +2268,6 @@ def run_aguilar_garrido_analysis():
         </p>
     </div>
     """, unsafe_allow_html=True)
-
 
 # ===================================================================
 # ROTEADOR PRINCIPAL
@@ -2321,8 +2286,8 @@ def main():
         run_jordao_analysis()
     elif st.session_state['selected_article'] == 'sharma':
         run_sharma_analysis()
-    elif st.session_state['selected_article'] == 'aguilar_garrido': # Novo roteamento
-        run_aguilar_garrido_analysis()
+    elif st.session_state['selected_article'] == 'mago': # Novo roteamento
+        run_mago_analysis()
 
 if __name__ == "__main__":
     main()
