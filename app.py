@@ -193,10 +193,16 @@ def show_homepage():
     
     col1, col2 = st.columns(2)
     
+    # Adicionando um placeholder para o clique, que será preenchido pelo JS
+    # Usamos uma key diferente para cada card para que o Streamlit entenda que são componentes distintos.
+    # O valor padrão é None, indicando que nenhum card foi clicado ainda.
+    clicked_dermendzhieva = None
+    clicked_jordao = None
+
     with col1:
         # Card para Dermendzhieva - agora com um atributo data-id para fácil identificação JS
         dermendzhieva_card_html = """
-        <div class="card" data-id="dermendzhieva">
+        <div class="card" id="card_dermendzhieva" data-id="dermendzhieva">
             <h2 style="color:#e0e5ff;">Dermendzhieva et al. (2021)</h2>
             <p style="color:#a0a7c0;">Análise temporal de parâmetros de vermicomposto</p>
             <ul class="custom-list">
@@ -207,11 +213,26 @@ def show_homepage():
         </div>
         """
         st.markdown(dermendzhieva_card_html, unsafe_allow_html=True)
+        # Novo: Adiciona um script JS para este card específico
+        clicked_dermendzhieva = streamlit_js_eval(
+            js_expressions="""
+                let card = document.getElementById('card_dermendzhieva');
+                if (card && !card._listenerAdded) { // Verifica se o listener já foi adicionado
+                    card.addEventListener('click', function() {
+                        Streamlit.setComponentValue('dermendzhieva'); // Envia o ID para o Python
+                    });
+                    card._listenerAdded = true; // Marca como adicionado
+                }
+                return Streamlit.args.default; // Retorna o valor atual do componente
+            """,
+            key="card_click_dermendzhieva", # Key único para este componente
+            want_reply=True # Queremos que o JS envie um valor de volta
+        )
 
     with col2:
         # Card para Jordão - agora com um atributo data-id para fácil identificação JS
         jordao_card_html = """
-        <div class="card" data-id="jordao">
+        <div class="card" id="card_jordao" data-id="jordao">
             <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
             <p style="color:#a0a7c0;">Remoção de metais pesados e cultivo de alface</p>
             <ul class="custom-list">
@@ -222,36 +243,31 @@ def show_homepage():
         </div>
         """
         st.markdown(jordao_card_html, unsafe_allow_html=True)
-
-    # NOVO: Script JavaScript para detectar cliques nos cards e enviar o ID para o Streamlit
-    # Este script agora usa 'document.querySelectorAll' para encontrar todos os cards
-    # e atribui um event listener a cada um.
-    # O valor retornado por streamlit_js_eval será o 'data-id' do card clicado.
-    clicked_card_id = streamlit_js_eval(
-        js_expressions="""
-            let clickedId = null;
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                // Adiciona o listener apenas se ainda não foi adicionado
-                if (!card._listenerAdded) {
+        # Novo: Adiciona um script JS para este card específico
+        clicked_jordao = streamlit_js_eval(
+            js_expressions="""
+                let card = document.getElementById('card_jordao');
+                if (card && !card._listenerAdded) { // Verifica se o listener já foi adicionado
                     card.addEventListener('click', function() {
-                        const cardId = this.getAttribute('data-id');
-                        Streamlit.setComponentValue(cardId);
+                        Streamlit.setComponentValue('jordao'); // Envia o ID para o Python
                     });
-                    card._listenerAdded = true; // Marca o listener como adicionado
+                    card._listenerAdded = true; // Marca como adicionado
                 }
-            });
-            // Retorna o valor atual do componente se houver, para que o Python possa reagir
-            return Streamlit.args.default;
-        """,
-        key="card_click_detector", # Um key único para este componente streamlit_js_eval
-        want_reply=True # Queremos que o JavaScript envie um valor de volta para o Python
-    )
-
-    # Se um card foi clicado e o ID foi retornado pelo JavaScript
-    if clicked_card_id:
-        st.session_state['selected_article'] = clicked_card_id
+                return Streamlit.args.default; // Retorna o valor atual do componente
+            """,
+            key="card_click_jordao", # Key único para este componente
+            want_reply=True # Queremos que o JS envie um valor de volta
+        )
+    
+    # Lógica de roteamento baseada no clique
+    # Verifica qual card foi clicado
+    if clicked_dermendzhieva == 'dermendzhieva' and st.session_state.get('selected_article') != 'dermendzhieva':
+        st.session_state['selected_article'] = 'dermendzhieva'
         st.rerun()
+    elif clicked_jordao == 'jordao' and st.session_state.get('selected_article') != 'jordao':
+        st.session_state['selected_article'] = 'jordao'
+        st.rerun()
+
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -1232,11 +1248,6 @@ def main():
     if 'selected_article' not in st.session_state:
         st.session_state['selected_article'] = None
     
-    # O valor de `clicked_card_id` é capturado diretamente no `show_homepage`
-    # e usado para atualizar `st.session_state['selected_article']`.
-    # A lógica de `if "article_selected" in st.session_state` foi removida
-    # pois `streamlit_js_eval` já atualiza diretamente.
-
     # Roteamento
     if st.session_state['selected_article'] is None:
         show_homepage()
