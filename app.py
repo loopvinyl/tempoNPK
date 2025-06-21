@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.ticker import MaxNLocator
 # Importar a biblioteca streamlit_js_eval para interações JavaScript
-from streamlit_js_eval import streamlit_js_eval # 
+from streamlit_js_eval import streamlit_js_eval
 
 # Configurações gerais com tema escuro
 st.set_page_config(
@@ -37,7 +37,7 @@ st.markdown("""
         margin-bottom: 28px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(100, 110, 200, 0.2);
-        cursor: pointer;
+        cursor: pointer; /* Adiciona cursor de ponteiro para indicar clicável */
         transition: all 0.3s ease;
     }
     
@@ -159,17 +159,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# REMOVIDO: O JavaScript para tornar os cards clicáveis será gerenciado pelo streamlit_js_eval.
-# st.markdown("""
-# <script>
-#     // Função para selecionar artigo
-#     function selectArticle(article) {
-#         // Enviar o comando para o Streamlit
-#         Streamlit.setComponentValue(article);
-#     }
-# </script>
-# """, unsafe_allow_html=True)
-
 # Configurar matplotlib para tema escuro premium
 plt.style.use('dark_background')
 mpl.rcParams.update({
@@ -206,8 +195,7 @@ def show_homepage():
     col1, col2 = st.columns(2)
     
     with col1:
-        # Card clicável para Dermendzhieva
-        # Usamos um container com um listener de evento para simular o clique
+        # Card para Dermendzhieva - sem onclick aqui no HTML
         dermendzhieva_card_html = """
         <div class="card" id="dermendzhieva_card">
             <h2 style="color:#e0e5ff;">Dermendzhieva et al. (2021)</h2>
@@ -220,14 +208,9 @@ def show_homepage():
         </div>
         """
         st.markdown(dermendzhieva_card_html, unsafe_allow_html=True)
-        # Ao invés de onclick no HTML, usamos streamlit_js_eval para adicionar o evento
-        # e passar o valor para o Streamlit. Isso é mais robusto.
-        if streamlit_js_eval(js_expressions="document.getElementById('dermendzhieva_card').onclick = () => Streamlit.setComponentValue('dermendzhieva');", key="derm_js_eval_listener", want_reply=False): # 
-            st.session_state['selected_article'] = 'dermendzhieva'
-            st.rerun()
 
     with col2:
-        # Card clicável para Jordão
+        # Card para Jordão - sem onclick aqui no HTML
         jordao_card_html = """
         <div class="card" id="jordao_card">
             <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
@@ -240,11 +223,38 @@ def show_homepage():
         </div>
         """
         st.markdown(jordao_card_html, unsafe_allow_html=True)
-        if streamlit_js_eval(js_expressions="document.getElementById('jordao_card').onclick = () => Streamlit.setComponentValue('jordao');", key="jordao_js_eval_listener", want_reply=False): # 
-            st.session_state['selected_article'] = 'jordao'
-            st.rerun()
 
-    # REMOVIDO: A verificação de "article_selected" será feita pelos listeners do streamlit_js_eval
+    # NOVO: Adicionar um JavaScript listener GLOBAL para os cliques nos cards
+    # Este script será executado uma vez e vai enviar o ID do card clicado para o Python
+    # Este é o ponto chave para a correção.
+    clicked_card_id = streamlit_js_eval(
+        js_expressions="""
+            const dermCard = document.getElementById('dermendzhieva_card');
+            const jordaoCard = document.getElementById('jordao_card');
+            
+            if (dermCard && !dermCard._listenerAdded) { // Adicionar listener apenas uma vez
+                dermCard.addEventListener('click', () => {
+                    Streamlit.setComponentValue('dermendzhieva');
+                });
+                dermCard._listenerAdded = true; // Flag para evitar duplicidade
+            }
+            if (jordaoCard && !jordaoCard._listenerAdded) { // Adicionar listener apenas uma vez
+                jordaoCard.addEventListener('click', () => {
+                    Streamlit.setComponentValue('jordao');
+                });
+                jordaoCard._listenerAdded = true; // Flag para evitar duplicidade
+            }
+            // Retorna o valor de um clique anterior se houver, ou null
+            return Streamlit.args.default;
+        """,
+        key="card_click_listener", # Um único key para o listener
+        want_reply=True # Queremos que o JavaScript envie um valor de volta
+    )
+
+    # Se um card foi clicado e o ID foi retornado pelo JavaScript
+    if clicked_card_id:
+        st.session_state['selected_article'] = clicked_card_id
+        st.rerun()
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -402,7 +412,7 @@ def run_dermendzhieva_analysis():
         # Configurar eixo X com dias numéricos
         ax.set_xticks(numeric_days)
         ax.set_xticklabels([d.replace('Day ', '') for d in days], fontsize=11)
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.xaxis.set_major_locator(MaxLocator(integer=True))
         
         # Melhorar formatação
         ax.set_xlabel("Dias de Vermicompostagem", fontsize=12, fontweight='bold', labelpad=15)
@@ -514,7 +524,7 @@ def run_dermendzhieva_analysis():
     """, unsafe_allow_html=True)
     
     if st.button("← Voltar para seleção de artigos"):
-        del st.session_state['selected_article']
+        st.session_state['selected_article'] = None # Volta para a homepage
         st.rerun()
     
     # Painel de configurações (agora na área principal)
@@ -1002,7 +1012,7 @@ def run_jordao_analysis():
     """, unsafe_allow_html=True)
 
     if st.button("← Voltar para seleção de artigos", key="back_button_jordao"):
-        del st.session_state['selected_article']
+        st.session_state['selected_article'] = None # Volta para a homepage
         st.rerun()
 
     # Painel de configurações
@@ -1225,11 +1235,6 @@ def main():
     # Inicializar estado da sessão
     if 'selected_article' not in st.session_state:
         st.session_state['selected_article'] = None
-    
-    # Capturar seleção de artigo via JavaScript
-    # Esta parte é importante e deve vir ANTES do roteamento
-    # O streamlit_js_eval irá atualizar st.session_state diretamente
-    # removemos a lógica de 'article_selected' pois o streamlit_js_eval já faz isso.
     
     # Roteamento
     if st.session_state['selected_article'] is None:
