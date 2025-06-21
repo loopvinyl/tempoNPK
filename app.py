@@ -504,13 +504,7 @@ def run_dermendzhieva_analysis():
     
     with col1:
         use_sample = st.checkbox("Usar dados de exemplo", value=True, key="use_sample")
-        distribution_type = st.radio(
-            "Tipo de distribuição para simulação:",
-            ('Normal', 'LogNormal'),
-            index=0,
-            key="dist_type_select",
-            help="Escolha o tipo de distribuição para gerar os dados simulados"
-        )
+        distribution_type = "LogNormal"
     
     with col2:
         unique_params = df['Parameter'].unique()
@@ -1000,18 +994,20 @@ def run_jordao_analysis():
         gs = fig.add_gridspec(num_plots, 1, hspace=0.6)
         axes = [fig.add_subplot(gs[i]) for i in range(num_plots)]
         
-        for i, param in enumerate(selected_params):
-            param_data = []
-            treatment_labels = []
-            
-            for treatment in treatments:
-                treatment_data = df[(df['Parameter'] == param) & 
-                                  (df['Treatment'] == treatment)]['Value'].dropna().values
-                if len(treatment_data) > 0:
-                    param_data.append(treatment_data)
-                    treatment_labels.append(treatment)
-            
-            if len(param_data) >= 2:
+        
+for i, param in enumerate(selected_params):
+    param_data = []
+    treatment_labels = []
+
+    for treatment in treatments:
+        treatment_data = df[(df['Parameter'] == param) & 
+                          (df['Treatment'] == treatment)]['Value'].dropna().values
+        if len(treatment_data) > 0:
+            param_data.append(treatment_data)
+            treatment_labels.append(treatment)
+
+    if len(param_data) >= 2 and all(len(group) > 1 for group in param_data):
+
                 try:
                     h_stat, p_val = kruskal(*param_data)
                     results.append({
