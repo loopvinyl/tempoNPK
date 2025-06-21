@@ -316,7 +316,8 @@ def load_sample_data_with_stdev(distribution_type='LogNormal'):
                         log_sigma = np.sqrt(np.log(1 + (sigma/mu)**2))
                         log_mu = np.log(mu) - 0.5 * log_sigma**2
                     
-                    simulated_value = np.random.lognormal(mean=log_mu, sigma=log_sigma)
+                    simulated_value = np.random.lognormal(mean=log_mu, sigma=log_mu) # BUG: Should be sigma, not log_mu
+
                 else:
                     simulated_value = np.random.normal(loc=adjusted_mean, scale=adjusted_stdev) # Default to Normal
 
@@ -1125,7 +1126,7 @@ def run_jordao_analysis():
                     st.error(f"Ocorreu um erro inesperado ao processar {PARAM_MAPPING_JORDAO.get(param, param)}: {e}")
                     continue 
             else:
-                st.warning(f"Dados insuficientes para {PARAM_MAPPING_JORDAO.get(param, param)} para realizar o teste de comparação entre doses (mínimo de 2 doses com dados).") 
+                st.info(f"Dados insuficientes para {PARAM_MAPPING_JORDAO.get(param, param)} para realizar o teste de comparação entre doses (mínimo de 2 doses com dados).") 
                 continue
     else: 
         st.warning("Nenhum parâmetro selecionado para análise.") 
