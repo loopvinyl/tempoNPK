@@ -2646,11 +2646,14 @@ def run_hanc_analysis():
         """, unsafe_allow_html=True)
         
         # Criar uma figura e eixos para cada tratamento
-        fig, axes = plt.subplots(len(selected_original_params), 1, figsize=(10, 6 * len(selected_original_params)), hspace=0.6)
-        # Se houver apenas um subplot, axes não será um array
+        fig, axes = plt.subplots(len(selected_original_params), 1, figsize=(10, 6 * len(selected_original_params)))
+        # Se houver apenas um subplot, axes não será um array. Garanta que seja iterável.
         if len(selected_original_params) == 1:
-            axes = [axes] # Coloca em uma lista para iterar consistentemente
+            axes = [axes] 
 
+        # Usar GridSpec para controlar o espaçamento (se necessário, o tight_layout abaixo pode ser suficiente)
+        # gs = fig.add_gridspec(len(selected_original_params), 1, hspace=0.6) # hspace moveu para tight_layout
+        
         for i, param in enumerate(selected_original_params):
             param_df_by_treatment = df_hanc[(df_hanc['Parameter'] == param) & (df_hanc['Treatment'] == treatment)]
             
@@ -2702,6 +2705,7 @@ def run_hanc_analysis():
                 ax = axes[i]
                 plot_hanc_parameter_evolution(ax, data_by_layer, layers_ordered, param, treatment)
 
+        plt.tight_layout(h_pad=0.6) # Usa h_pad para controle vertical no tight_layout
         st.pyplot(fig)
         plt.close(fig) # Fecha a figura para liberar memória
         st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True) # Espaçamento entre blocos de tratamento
