@@ -282,6 +282,27 @@ def show_homepage():
                 st.session_state['selected_article'] = 'sharma'
                 st.rerun()
 
+    # Novo card para o artigo de Adi e Noor (2009)
+    st.markdown("""
+    <div class="card-container">
+        <div class="card">
+            <h2 style="color:#e0e5ff;">Adi e Noor (2009)</h2>
+            <p style="color:#a0a7c0;">Análise de elementos nutricionais em vermicomposto</p>
+            <ul class="custom-list">
+                <li>Comparação entre diferentes tratamentos de resíduos</li>
+                <li>Elementos: C, N, P, K, Ca, Mg, Na, Zn, Cu, Fe, Mn, B, Gordura Bruta, Razão C/N</li>
+                <li>Teste de Kruskal-Wallis</li>
+            </ul>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("Selecionar Adi e Noor", key="btn_adinoor", 
+                 help="Clique para selecionar este artigo",
+                 use_container_width=True,
+                 type="primary"):
+        st.session_state['selected_article'] = 'adi_noor'
+        st.rerun()
+
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
 # ===================================================================
@@ -1803,6 +1824,413 @@ def run_sharma_analysis():
     """, unsafe_allow_html=True)
 
 # ===================================================================
+# MÓDULO ADI E NOOR (2009) - ANÁLISE DE ELEMENTOS NUTRICIONAIS
+# ===================================================================
+def run_adi_noor_analysis():
+    """Módulo para análise de elementos nutricionais do vermicomposto (Adi e Noor, 2009)"""
+
+    # Mapeamento de parâmetros para exibição na UI
+    PARAM_MAPPING = {
+        "Organic carbon": "Carbono Orgânico (%)",
+        "Nitrogen (as N)": "Nitrogênio (N) (%)",
+        "Phosphorus (as P)": "Fósforo (P) (%)",
+        "Potassium (as K)": "Potássio (K) (%)",
+        "Calcium (as Ca)": "Cálcio (Ca) (%)",
+        "Magnesium (as Mg)": "Magnésio (Mg) (%)",
+        "Sodium (as Na)": "Sódio (Na) (%)",
+        "Zinc (as Zn)": "Zinco (Zn) (%)",
+        "Copper (as Cu)": "Cobre (Cu) (%)",
+        "Iron (as Fe)": "Ferro (Fe) (%)",
+        "Manganese (as Mn)": "Manganês (Mn) (%)",
+        "Boron (as B)": "Boro (B) (%)",
+        "Crude Fat": "Gordura Bruta (%)",
+        "C/N ratio": "Razão C/N"
+    }
+
+    # Dados da Tabela 2 do artigo Adi e Noor (2009)
+    # Valores são médias, mas precisamos simular desvio padrão para o teste estatístico
+    # O desvio padrão será pequeno para refletir a precisão dos dados de tabela
+    NUTRIENT_DATA = {
+        "Organic carbon": {"T₁": (15.1, 0.1), "T₂": (14.9, 0.1), "T₃": (15.2, 0.1)},
+        "Nitrogen (as N)": {"T₁": (1.07, 0.05), "T₂": (2.01, 0.05), "T₃": (2.13, 0.05)},
+        "Phosphorus (as P)": {"T₁": (0.32, 0.01), "T₂": (0.29, 0.01), "T₃": (0.24, 0.01)},
+        "Potassium (as K)": {"T₁": (0.41, 0.02), "T₂": (0.99, 0.02), "T₃": (0.79, 0.02)},
+        "Calcium (as Ca)": {"T₁": (3.12, 0.05), "T₂": (1.00, 0.05), "T₃": (0.41, 0.05)},
+        "Magnesium (as Mg)": {"T₁": (0.20, 0.01), "T₂": (0.28, 0.01), "T₃": (0.26, 0.01)},
+        "Sodium (as Na)": {"T₁": (0.12, 0.005), "T₂": (0.09, 0.005), "T₃": (0.05, 0.005)},
+        "Zinc (as Zn)": {"T₁": (0.015, 0.001), "T₂": (0.016, 0.001), "T₃": (0.012, 0.001)},
+        "Copper (as Cu)": {"T₁": (0.006, 0.0005), "T₂": (0.007, 0.0005), "T₃": (0.005, 0.0005)},
+        "Iron (as Fe)": {"T₁": (0.51, 0.02), "T₂": (0.37, 0.02), "T₃": (0.28, 0.02)},
+        "Manganese (as Mn)": {"T₁": (0.014, 0.001), "T₂": (0.012, 0.001), "T₃": (0.011, 0.001)},
+        "Boron (as B)": {"T₁": (0.0003, 0.00001), "T₂": (0.0003, 0.00001), "T₃": (0.0004, 0.00001)},
+        "Crude Fat": {"T₁": (1.20, 0.05), "T₂": (0.80, 0.05), "T₃": (0.35, 0.05)},
+        "C/N ratio": {"T₁": (14.1, 0.5), "T₂": (7.4, 0.5), "T₃": (7.1, 0.5)}
+    }
+
+    # Descrições dos tratamentos
+    TREATMENT_DESCRIPTIONS = {
+        "T₁": "Esterco de vaca: Resíduos de cozinha (30:70)",
+        "T₂": "Esterco de vaca: Borra de café (30:70)",
+        "T₃": "Esterco de vaca: Resíduos de cozinha: Borra de café (30:35:35)"
+    }
+
+    @st.cache_data
+    def load_adi_noor_data(num_replications=8): # O artigo menciona 8 réplicas
+        all_data = []
+        for param, treatments in NUTRIENT_DATA.items():
+            for treatment, (mean, stdev) in treatments.items():
+                for _ in range(num_replications):
+                    value = np.random.normal(mean, stdev)
+                    # Garantir valores não-negativos para concentrações
+                    value = max(0.0, value)
+                    
+                    all_data.append({
+                        "Parameter": param,
+                        "Treatment": treatment,
+                        "Value": value
+                    })
+        return pd.DataFrame(all_data)
+
+    def plot_nutrient_comparison(ax, data, treatments, param_name):
+        colors = ['#6f42c1', '#00c1e0', '#ffd166'] # Cores para T1, T2, T3
+        
+        for i, treatment in enumerate(treatments):
+            group_data = data[i]
+            
+            ax.scatter(
+                [i] * len(group_data), 
+                group_data, 
+                alpha=0.85, 
+                s=100,
+                color=colors[i % len(colors)],
+                edgecolors='white',
+                linewidth=1.2,
+                zorder=3,
+                label=TREATMENT_DESCRIPTIONS[treatment],
+                marker='o'
+            )
+            
+            # Plotar média e intervalo de confiança
+            mean_val = np.mean(group_data)
+            std_val = np.std(group_data)
+            
+            ax.errorbar(
+                i, mean_val, 
+                yerr=1.96*std_val/np.sqrt(len(group_data)), # IC 95%
+                fmt='o',
+                markersize=10,
+                color='white',
+                markeredgecolor='black',
+                markeredgewidth=1.5,
+                elinewidth=3,
+                capsize=8,
+                zorder=5
+            )
+        
+        ax.set_xticks(range(len(treatments)))
+        ax.set_xticklabels([TREATMENT_DESCRIPTIONS[t].split(' ')[-1].replace('(','') for t in treatments], rotation=15, ha="right", fontsize=10) # Rótulo simplificado
+        
+        ax.set_xlabel("Tipo de Tratamento", fontsize=12, fontweight='bold', labelpad=15)
+        ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
+        ax.set_title(f"Comparação de {PARAM_MAPPING.get(param_name, param_name)} entre Tratamentos", 
+                     fontsize=14, fontweight='bold', pad=20)
+        
+        ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
+        ax.legend(loc='lower right', fontsize=9, framealpha=0.25) # Ajuste da localização da legenda
+        
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        
+        ax.set_facecolor('#0c0f1d')
+        
+        return ax
+
+    def display_adi_noor_interpretation(results):
+        st.markdown("""
+        <div class="card">
+            <h2 style="display:flex;align-items:center;gap:10px;">
+                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                    📝 Interpretação dos Resultados - Adi e Noor (2009)
+                </span>
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if not results:
+            st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
+            return
+        
+        for res in results:
+            param_name = res["Parâmetro"]
+            p_val = res["p-value"]
+            is_significant = p_val < 0.05
+            
+            card_class = "signif-card" if is_significant else "not-signif-card"
+            icon = "✅" if is_significant else "❌"
+            title_color = "#00c853" if is_significant else "#ff5252"
+            status = "Significativo" if is_significant else "Não Significativo"
+            
+            st.markdown(f"""
+            <div class="result-card {card_class}">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="font-size:28px; color:{title_color};">{icon}</div>
+                        <h3 style="margin:0; color:{title_color}; font-weight:600;">{param_name}</h3>
+                    </div>
+                    <div style="background:rgba(42, 47, 69, 0.7); padding:8px 18px; border-radius:30px; border:1px solid {title_color}30;">
+                        <span style="font-weight:bold; font-size:1.1rem; color:{title_color};">{status}</span>
+                        <span style="color:#a0a7c0; margin-left:8px;">p = {p_val:.4f}</span>
+                    </div>
+                </div>
+                <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
+            """, unsafe_allow_html=True)
+            
+            if is_significant:
+                st.markdown(f"""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        <b>Diferenças significativas encontradas entre os tratamentos.</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        A composição do material orgânico afeta significativamente este elemento nutricional.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        <b>Não foram encontradas diferenças significativas entre os tratamentos.</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        A composição do material orgânico não afeta significativamente este elemento nutricional.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
+
+    # Interface principal do módulo Adi e Noor
+    st.markdown("""
+    <div class="header-card">
+        <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
+            🌱 Análise de Elementos Nutricionais em Vermicomposto
+        </h1>
+        <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
+        Adi e Noor (2009) - Reciclagem de resíduos: Utilização de borra de café e resíduos de cozinha em vermicompostagem
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("← Voltar para seleção de artigos"):
+        del st.session_state['selected_article']
+        st.rerun()
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                ⚙️ Configurações de Análise
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("Os dados são carregados diretamente da Tabela 2 do artigo.")
+    
+    with col2:
+        param_options = list(PARAM_MAPPING.values())
+        selected_params = st.multiselect(
+            "Selecione os parâmetros para análise:",
+            options=param_options,
+            default=param_options[:5],
+            key="adi_noor_param_select"
+        )
+    
+    df = load_adi_noor_data()
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                🔍 Dados do Estudo
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.dataframe(df)
+    st.markdown(f"**Total de amostras simuladas:** {len(df)}")
+
+    st.markdown("""
+    <div class="info-card">
+        <h3 style="display:flex;align-items:center;color:#00c1e0;">
+            <span class="info-icon">ℹ️</span> Metodologia de Análise
+        </h3>
+        <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
+            <p>
+                Os dados para esta análise foram extraídos da Tabela 2 do artigo de Adi e Noor (2009). Para permitir a análise estatística, foram simuladas <b>8 réplicas</b> para cada valor médio de elemento nutricional e tratamento, utilizando uma distribuição normal com um pequeno desvio padrão para refletir a precisão dos dados de tabela.
+            </p>
+            <p>
+                <b>Tratamentos analisados:</b>
+                <ul>
+                    <li><b>T₁:</b> Esterco de vaca: Resíduos de cozinha (30:70)</li>
+                    <li><b>T₂:</b> Esterco de vaca: Borra de café (30:70)</li>
+                    <li><b>T₃:</b> Esterco de vaca: Resíduos de cozinha: Borra de café (30:35:35)</li>
+                </ul>
+            </p>
+            <p>
+                O teste de Kruskal-Wallis foi aplicado para verificar se existem diferenças significativas 
+                entre os tratamentos para cada elemento nutricional.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.divider()
+
+    # Realizar Análise
+    if not selected_params:
+        st.warning("Selecione pelo menos um parâmetro para análise.")
+        return
+
+    reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
+    selected_original_params = [reverse_mapping[p] for p in selected_params]
+    
+    results = []
+    treatments_ordered = ["T₁", "T₂", "T₃"]
+    
+    num_plots = len(selected_params)
+    
+    if num_plots > 0:
+        fig = plt.figure(figsize=(10, 6 * num_plots))
+        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)
+        axes = [fig.add_subplot(gs[i]) for i in range(num_plots)]
+    
+        for i, param in enumerate(selected_original_params):
+            param_df = df[df['Parameter'] == param]
+            
+            data_by_treatment = []
+            for treatment in treatments_ordered:
+                treatment_data = param_df[param_df['Treatment'] == treatment]['Value'].values
+                data_by_treatment.append(treatment_data)
+            
+            try:
+                h_stat, p_val = kruskal(*data_by_treatment)
+                results.append({
+                    "Parâmetro": PARAM_MAPPING[param],
+                    "H-Statistic": h_stat,
+                    "p-value": p_val,
+                    "Significativo (p<0.05)": p_val < 0.05
+                })
+                
+                ax = axes[i]
+                plot_nutrient_comparison(ax, data_by_treatment, treatments_ordered, param)
+                
+                annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
+                ax.text(
+                    0.5, 0.95, 
+                    annotation_text,
+                    transform=ax.transAxes,
+                    ha='center',
+                    va='top',
+                    fontsize=11,
+                    color='white',
+                    bbox=dict(
+                        boxstyle="round,pad=0.3",
+                        facecolor='#2a2f45',
+                        alpha=0.8,
+                        edgecolor='none'
+                    )
+                )
+            except Exception as e:
+                st.error(f"Erro ao processar {param}: {str(e)}")
+                continue
+    
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                📈 Resultados Estatísticos
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if results:
+        results_df = pd.DataFrame(results)
+        results_df['Significância'] = results_df['p-value'].apply(
+            lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
+        )
+        results_df = results_df[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
+        
+        st.dataframe(
+            results_df.style
+            .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
+            .set_properties(**{
+                'color': 'white',
+                'background-color': '#131625',
+            })
+            .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
+                               if x['p-value'] < 0.05 else '' for i in x], axis=1)
+        )
+    else:
+        st.info("Nenhum resultado estatístico disponível.")
+    
+    if num_plots > 0:
+        st.markdown("""
+        <div class="card">
+            <h2 style="display:flex;align-items:center;gap:10px;">
+                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                    📊 Comparação de Elementos Nutricionais
+                </span>
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+        plt.close(fig)
+    
+    display_adi_noor_interpretation(results)
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                📚 Referência Bibliográfica
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="reference-card">
+        <p style="line-height:1.8; text-align:justify;">
+            ADI, A. J.; NOOR, Z. M. 
+            Waste recycling: Utilization of coffee grounds and kitchen waste in vermicomposting. 
+            <strong>Bioresource Technology</strong>, 
+            v. 100, n. 3, p. 1027-1030, 2009.
+        </p>
+        <p style="margin-top:10px;">
+            <strong>DOI:</strong> 10.1016/j.biortech.2008.07.024
+        </p>
+        <p style="margin-top:15px; font-style:italic;">
+            Nota: Os dados utilizados nesta análise são baseados no estudo supracitado. 
+            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ===================================================================
 # ROTEADOR PRINCIPAL
 # ===================================================================
 def main():
@@ -1819,6 +2247,8 @@ def main():
         run_jordao_analysis()
     elif st.session_state['selected_article'] == 'sharma':
         run_sharma_analysis()
+    elif st.session_state['selected_article'] == 'adi_noor':
+        run_adi_noor_analysis()
 
 if __name__ == "__main__":
     main()
