@@ -302,7 +302,7 @@ def run_dermendzhieva_analysis():
         'Day 1': 1,
         'Day 30': 30,
         'Day 60': 60,
-        '极 90': 90,
+        'Day 90': 90, # Corrected '极 90' to 'Day 90'
         'Day 120': 120
     }
 
@@ -478,7 +478,7 @@ def run_dermendzhieva_analysis():
         for res in results:
             param_name = res["Parâmetro"]
             p_val = res["p-value"]
-            is_significant = p极 < 0.05
+            is_significant = p_val < 0.05 # Corrected 'p极' to 'p_val'
             
             card_class = "signif-card" if is_significant else "not-signif-card"
             icon = "✅" if is_significant else "❌"
@@ -524,7 +524,7 @@ def run_dermendzhieva_analysis():
                             <span style="color:#ff5252; font-size:1.5rem;">•</span>
                             <b>Aceitamos a hipótese nula (H₀)</b>
                         </p>
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8极;">
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                             <span style="color:#ff5252; font-size:1.5rem;">•</span>
                             Não há evidências suficientes de mudanças significativas
                         </p>
@@ -1037,7 +1037,7 @@ def run_jordao_analysis():
                 st.markdown(f"""
                 <div style="color:#e0e5ff; line-height:1.8;">
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5极;">•</span>
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
                         <b>Não foram encontradas diferenças significativas entre doses</b>
                     </p>
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
@@ -1073,7 +1073,7 @@ def run_jordao_analysis():
             <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
                 ⚙️ Configurações de Análise
             </span>
-        </h极>
+        </h2>
     </div>
     """, unsafe_allow_html=True)
     
