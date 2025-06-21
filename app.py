@@ -727,10 +727,10 @@ def run_dermendzhieva_analysis():
     """, unsafe_allow_html=True)
 
 # ===================================================================
-# MÓDULO JORDÃO ET AL. (2007) - ANÁLISE COMPARATIVA
+# MÓDULO JORDÃO ET AL. (2007) - ANÁLISE COMPARATIVA (CORRIGIDO)
 # ===================================================================
 def run_jordao_analysis():
-    """Módulo para análise comparativa de tratamentos"""
+    """Módulo para análise comparativa de tratamentos (versão corrigida)"""
     
     # Mapeamento de parâmetros
     PARAM_MAPPING = {
@@ -786,9 +786,15 @@ def run_jordao_analysis():
         
         return pd.DataFrame(data)
     
-    # Função para plotar comparação entre tratamentos
+    # Função para plotar comparação entre tratamentos (CORRIGIDA)
     def plot_parameter_comparison(ax, data, treatment_names, param_name):
         colors = ['#6f42c1', '#00c1e0', '#00d4b1']
+        
+        # Verificar se temos dados para plotar
+        if not data or any(len(group) == 0 for group in data):
+            ax.text(0.5, 0.5, 'Dados insuficientes para plotar', 
+                    ha='center', va='center', fontsize=12, color='white')
+            return ax
         
         for i, (treatment_data, treatment_name) in enumerate(zip(data, treatment_names)):
             # Plotar pontos individuais
@@ -830,8 +836,14 @@ def run_jordao_analysis():
         # Fundo gradiente
         ax.set_facecolor('#0c0f1d')
         
+        # Ajustar automaticamente os limites do eixo Y
+        all_vals = np.concatenate(data)
+        y_min = min(all_vals) * 0.9
+        y_max = max(all_vals) * 1.1
+        ax.set_ylim(y_min, y_max)
+        
         return ax
-    
+
     # Função para exibir resultados com contexto específico
     def display_jordao_results_interpretation(results):
         st.markdown("""
@@ -997,18 +1009,27 @@ def run_jordao_analysis():
         for i, param in enumerate(selected_params):
             param_data = []
             treatment_labels = []
-
+            
+            # Coletar dados para cada tratamento
             for treatment in treatments:
+                # Filtrar dados para o parâmetro e tratamento específico
                 treatment_data = df[(df['Parameter'] == param) & 
                                   (df['Treatment'] == treatment)]['Value'].dropna().values
+                
+                # Verificar se temos dados
                 if len(treatment_data) > 0:
                     param_data.append(treatment_data)
                     treatment_labels.append(treatment)
+                else:
+                    st.warning(f"Sem dados para {param} no tratamento {treatment}")
 
             # Verificar se temos dados suficientes para análise
-            if len(param_data) >= 2 and all(len(group) > 1 for group in param_data):
+            if len(param_data) >= 2:
                 try:
+                    # Executar teste de Kruskal-Wallis
                     h_stat, p_val = kruskal(*param_data)
+                    
+                    # Armazenar resultados
                     results.append({
                         "Parâmetro": PARAM_MAPPING.get(param, param),
                         "H-Statistic": h_stat,
@@ -1039,8 +1060,16 @@ def run_jordao_analysis():
                     )
                 except Exception as e:
                     st.error(f"Erro ao processar {param}: {str(e)}")
+                    # Plotar gráfico vazio com mensagem de erro
+                    ax = axes[i]
+                    ax.text(0.5, 0.5, f"Erro: {str(e)}", 
+                            ha='center', va='center', fontsize=12, color='red')
             else:
                 st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)}")
+                # Plotar gráfico vazio com mensagem de aviso
+                ax = axes[i]
+                ax.text(0.5, 0.5, 'Dados insuficientes para análise', 
+                        ha='center', va='center', fontsize=12, color='yellow')
     
     # Resultados estatísticos
     st.markdown("""
