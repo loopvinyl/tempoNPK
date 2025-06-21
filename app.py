@@ -8,7 +8,7 @@ from matplotlib.ticker import MaxNLocator
 
 # Configurações gerais com tema escuro
 st.set_page_config(
-    page_title="Análise Estatística de Vermicompostagem", 
+    page_title="Análise de Vermicompostos",  # Título alterado
     layout="wide",
     page_icon="📊"
 )
@@ -174,7 +174,7 @@ def show_homepage():
     st.markdown(f"""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
-            📚 Plataforma de Análise de Artigos Científicos
+            🪱 Análise de Vermicompostos
         </h1>
         <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
             Selecione um artigo abaixo para realizar a análise estatística
@@ -489,46 +489,30 @@ def run_dermendzhieva_analysis():
         del st.session_state['selected_article']
         st.experimental_rerun()
     
-    # Sidebar
-    with st.sidebar:
-        st.markdown("""
-        <div class="card">
-            <h3 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    📂 Opções de Dados
-                </span>
-            </h3>
-        """, unsafe_allow_html=True)
-        
+    # Painel de configurações (agora na área principal)
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                ⚙️ Configurações de Análise
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
         use_sample = st.checkbox("Usar dados de exemplo", value=True, key="use_sample")
-        
         distribution_type = st.radio(
             "Tipo de distribuição para simulação:",
             ('Normal', 'LogNormal'),
             index=0,
             key="dist_type_select",
-            help="Escolha o tipo de distribuição para gerar os dados simulados. LogNormal é frequentemente mais adequado para dados ambientais que não são simétricos e têm um limite inferior de zero."
+            help="Escolha o tipo de distribuição para gerar os dados simulados"
         )
-
-        # Recarregar dados com base na escolha da distribuição
-        df = load_sample_data_with_stdev(distribution_type)
-        
-        if not use_sample:
-            uploaded_file = st.file_uploader("Carregue o artigo PDF", type="pdf", key="pdf_uploader")
-            if uploaded_file:
-                st.success("Funcionalidade PDF em desenvolvimento. Usando dados de exemplo.")
-            else:
-                st.info("Nenhum PDF carregado. Usando dados de exemplo.")
-        
-        st.markdown("""
-        <div class="card">
-            <h3 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    ⚙️ Configuração de Análise
-                </span>
-            </h3>
-        """, unsafe_allow_html=True)
-        
+    
+    with col2:
         unique_params = df['Parameter'].unique()
         param_options = [PARAM_MAPPING.get(p, p) for p in unique_params]
         
@@ -538,38 +522,10 @@ def run_dermendzhieva_analysis():
             default=param_options,
             key="param_select"
         )
-        
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="card">
-            <h3 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    📚 Metodologia Estatística
-                </span>
-            </h3>
-            <div style="color:#d7dce8; line-height:1.7;">
-                <p><b>Teste de Kruskal-Wallis</b></p>
-                <ul style="padding-left:20px;">
-                    <li>Alternativa não paramétrica à ANOVA</li>
-                    <li>Compara medianas de múltiplos grupos</li>
-                    <li>Hipóteses:
-                        <ul>
-                            <li>H₀: Distribuições idênticas</li>
-                            <li>H₁: Pelo menos uma distribuição diferente</li>
-                        </ul>
-                    </li>
-                    <li>Interpretação:
-                        <ul>
-                            <li>p &lt; 0.05: Diferenças significativas</li>
-                            <li>p ≥ 0.05: Sem evidência de diferenças</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
+    
+    # Carregar dados
+    df = load_sample_data_with_stdev(distribution_type)
+    
     # Pré-visualização dos Dados (TODAS AS AMOSTRAS)
     st.markdown("""
     <div class="card">
@@ -584,7 +540,7 @@ def run_dermendzhieva_analysis():
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
     
-    # Explicação detalhada sobre a produção das amostras (CORRIGIDA E ADAPTADA)
+    # Explicação detalhada sobre a produção das amostras
     st.markdown(f"""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
@@ -980,23 +936,27 @@ def run_jordao_analysis():
     # Carregar dados
     df = load_jordao_sample_data()
     
-    # Sidebar
-    with st.sidebar:
-        st.markdown("""
-        <div class="card">
-            <h3 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    ⚙️ Configuração de Análise
-                </span>
-            </h3>
-        """, unsafe_allow_html=True)
-        
+    # Painel de configurações (agora na área principal)
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                ⚙️ Configurações de Análise
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
         analysis_type = st.radio(
             "Tipo de análise:",
             ('Caracterização do Vermicomposto', 'Cultivo de Alface'),
             index=0
         )
-        
+    
+    with col2:
         # Filtrar parâmetros baseado no tipo de análise
         if analysis_type == 'Caracterização do Vermicomposto':
             param_options = [p for p in df['Parameter'].unique() 
@@ -1013,30 +973,6 @@ def run_jordao_analysis():
             default=param_options[:2],
             key="param_select"
         )
-        
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class="card">
-            <h3 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:3px 12px;border-radius:30px;font-size:1rem;">
-                    📚 Metodologia Estatística
-                </span>
-            </h3>
-            <div style="color:#d7dce8; line-height:1.7;">
-                <p><b>Teste de Kruskal-Wallis</b></p>
-                <ul style="padding-left:20px;">
-                    <li>Comparação entre grupos de tratamentos</li>
-                    <li>Hipóteses:
-                        <ul>
-                            <li>H₀: Não há diferença entre os tratamentos</li>
-                            <li>H₁: Pelo menos um tratamento difere</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
     
     # Pré-visualização dos dados
     st.markdown("""
