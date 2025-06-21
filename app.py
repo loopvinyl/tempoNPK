@@ -205,7 +205,7 @@ def show_homepage():
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         # Container para o card clicável
@@ -256,6 +256,31 @@ def show_homepage():
                          type="primary"):
                 st.session_state['selected_article'] = 'jordao'
                 st.rerun()
+                
+    with col3:
+        # Container para o card clicável
+        with st.container():
+            st.markdown("""
+            <div class="card-container">
+                <div class="card">
+                    <h2 style="color:#e0e5ff;">Sharma (2019)</h2>
+                    <p style="color:#a0a7c0;">Comparação de vermicompostos por espécie</p>
+                    <ul class="custom-list">
+                        <li>Três espécies de minhocas epigeicas</li>
+                        <li>Parâmetros: N, P, K, pH, C/N</li>
+                        <li>Comparação com solo original</li>
+                    </ul>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Botão invisível que cobre todo o card
+            if st.button("Selecionar Sharma", key="btn_sharma", 
+                         help="Clique para selecionar este artigo",
+                         use_container_width=True,
+                         type="primary"):
+                st.session_state['selected_article'] = 'sharma'
+                st.rerun()
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -277,7 +302,7 @@ def run_dermendzhieva_analysis():
         'Day 1': 1,
         'Day 30': 30,
         'Day 60': 60,
-        'Day 90': 90,
+        '极 90': 90,
         'Day 120': 120
     }
 
@@ -293,7 +318,7 @@ def run_dermendzhieva_analysis():
                 'Day 120': {'mean': 24.5, 'stdev': 0.9}
             },
             'Total P (g/kg)': {
-                'Day 极': {'mean': 12.1, 'stdev': 0.3},
+                'Day 1': {'mean': 12.1, 'stdev': 0.3},
                 'Day 30': {'mean': 12.8, 'stdev': 0.4},
                 'Day 60': {'mean': 13.5, 'stdev': 0.4},
                 'Day 90': {'mean': 14.2, 'stdev': 0.5},
@@ -323,7 +348,7 @@ def run_dermendzhieva_analysis():
         }
 
         num_replications = 3
-        days = ['Day 1', 'Day 30', 'Day 60', 'Day 90', '极 120']
+        days = ['Day 1', 'Day 30', 'Day 60', 'Day 90', 'Day 120']
         all_replicated_data = []
 
         for param_name, daily_stats in sample_param_data.items():
@@ -453,7 +478,7 @@ def run_dermendzhieva_analysis():
         for res in results:
             param_name = res["Parâmetro"]
             p_val = res["p-value"]
-            is_significant = p_val < 0.05
+            is_significant = p极 < 0.05
             
             card_class = "signif-card" if is_significant else "not-signif-card"
             icon = "✅" if is_significant else "❌"
@@ -499,7 +524,7 @@ def run_dermendzhieva_analysis():
                             <span style="color:#ff5252; font-size:1.5rem;">•</span>
                             <b>Aceitamos a hipótese nula (H₀)</b>
                         </p>
-                        <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <p style="margin:12px 0; display:flex; align-items:center; gap:8极;">
                             <span style="color:#ff5252; font-size:1.5rem;">•</span>
                             Não há evidências suficientes de mudanças significativas
                         </p>
@@ -532,7 +557,7 @@ def run_dermendzhieva_analysis():
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15极;border-radius:30px;font-size:1.2rem;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
                 ⚙️ Configurações de Análise
             </span>
         </h2>
@@ -1012,7 +1037,7 @@ def run_jordao_analysis():
                 st.markdown(f"""
                 <div style="color:#e0e5ff; line-height:1.8;">
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        <span style="color:#ff5252; font-size:1.5极;">•</span>
                         <b>Não foram encontradas diferenças significativas entre doses</b>
                     </p>
                     <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
@@ -1048,7 +1073,7 @@ def run_jordao_analysis():
             <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
                 ⚙️ Configurações de Análise
             </span>
-        </h2>
+        </h极>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1092,7 +1117,7 @@ def run_jordao_analysis():
     # Explicação sobre geração de dados
     st.markdown(f"""
     <div class="info-card">
-        <h3 style="display:极;align-items:center;color:#00c1e0;">
+        <h3 style="display:flex;align-items:center;color:#00c1e0;">
             <span class="info-icon">ℹ️</span> Como as amostras foram produzidas
         </h3>
         <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
@@ -1259,25 +1284,6 @@ def run_jordao_analysis():
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-# ===================================================================
-# ROTEADOR PRINCIPAL
-# ===================================================================
-def main():
-    # Inicializar estado da sessão
-    if 'selected_article' not in st.session_state:
-        st.session_state['selected_article'] = None
-    
-    # Roteamento
-    if st.session_state['selected_article'] is None:
-        show_homepage()
-    elif st.session_state['selected_article'] == 'dermendzhieva':
-        run_dermendzhieva_analysis()
-    elif st.session_state['selected_article'] == 'jordao':
-        run_jordao_analysis()
-
-if __name__ == "__main__":
-    main()
 
 # ===================================================================
 # MÓDULO SHARMA ET AL. (2019) - COMPARAÇÃO DE VERMICOMPOSTOS
@@ -1795,8 +1801,11 @@ def run_sharma_analysis():
     </div>
     """, unsafe_allow_html=True)
 
-# Atualizar o roteador principal
+# ===================================================================
+# ROTEADOR PRINCIPAL
+# ===================================================================
 def main():
+    # Inicializar estado da sessão
     if 'selected_article' not in st.session_state:
         st.session_state['selected_article'] = None
     
@@ -1807,34 +1816,8 @@ def main():
         run_dermendzhieva_analysis()
     elif st.session_state['selected_article'] == 'jordao':
         run_jordao_analysis()
-    elif st.session_state['selected_article'] == 'sharma':  # Novo caso
+    elif st.session_state['selected_article'] == 'sharma':
         run_sharma_analysis()
 
-# Atualizar a homepage para incluir o novo card
-def show_homepage():
-    # ... (código existente)
-    
-    # Adicionar terceiro card para Sharma
-    col3 = st.columns(1)[0]  # Criar nova coluna
-    
-    with col3:
-        with st.container():
-            st.markdown("""
-            <div class="card-container">
-                <div class="card">
-                    <h2 style="color:#e0e5ff;">Sharma (2019)</h2>
-                    <p style="color:#a0a7c0;">Comparação de vermicompostos por espécie de minhoca</p>
-                    <ul class="custom-list">
-                        <li>Três espécies de minhocas epigeicas</li>
-                        <li>Parâmetros: N, P, K, pH, C/N</li>
-                        <li>Comparação com solo original</li>
-                    </ul>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button("Selecionar Sharma", key="btn_sharma", 
-                         use_container_width=True,
-                         type="primary"):
-                st.session_state['selected_article'] = 'sharma'
-                st.rerun()
+if __name__ == "__main__":
+    main()
