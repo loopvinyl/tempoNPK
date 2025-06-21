@@ -303,6 +303,27 @@ def show_homepage():
         st.session_state['selected_article'] = 'mago'
         st.rerun()
 
+    # Novo card para o artigo de Hanc et al. (2021)
+    st.markdown("""
+    <div class="card-container">
+        <div class="card">
+            <h2 style="color:#e0e5ff;">Hanc et al. (2021)</h2>
+            <p style="color:#a0a7c0;">Conversão de borra de café em vermicomposto</p>
+            <ul class="custom-list">
+                <li>Análise temporal de pH, C/N, N-NH₄⁺, N-NO₃⁻, Fósforo e Potássio</li>
+                <li>Diferentes camadas (idades) e tratamentos</li>
+                <li>Teste de Kruskal-Wallis</li>
+            </ul>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("Selecionar Hanc", key="btn_hanc",
+                 help="Clique para selecionar este artigo",
+                 use_container_width=True,
+                 type="primary"):
+        st.session_state['selected_article'] = 'hanc'
+        st.rerun()
+
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
 # ===================================================================
@@ -415,18 +436,18 @@ def run_dermendzhieva_analysis():
 
         return pd.DataFrame(all_replicated_data)
     
-    # Função para plotar evolução temporal
+    # Function to plot temporal evolution
     def plot_parameter_evolution(ax, data, days, param_name):
-        # Converter dias para numérico para ordenação
+        # Convert days to numeric for ordering
         numeric_days = [DAY_MAPPING[d] for d in days]
         
-        # Paleta de cores moderna
+        # Modern color palette
         colors = ['#6f42c1', '#00c1e0', '#00d4b1', '#ffd166', '#ff6b6b']
         
         for i, (day, num_day) in enumerate(zip(days, numeric_days)):
             group_data = data[i]
             
-            # Plotar pontos individuais com efeito de profundidade
+            # Plot individual points with depth effect
             ax.scatter(
                 [num_day] * len(group_data), 
                 group_data, 
@@ -440,7 +461,7 @@ def run_dermendzhieva_analysis():
                 marker='o'
             )
         
-        # Calcular e plotar medianas com estilo premium
+        # Calculate and plot medians with premium style
         medians = [np.median(group) for group in data]
         ax.plot(
             numeric_days, 
@@ -456,32 +477,32 @@ def run_dermendzhieva_analysis():
             alpha=0.95
         )
         
-        # Configurar eixo X com dias numéricos
+        # Configure X-axis with numeric days
         ax.set_xticks(numeric_days)
         ax.set_xticklabels([d.replace('Day ', '') for d in days], fontsize=11)
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         
-        # Melhorar formatação
+        # Improve formatting
         ax.set_xlabel("Dias de Vermicompostagem", fontsize=12, fontweight='bold', labelpad=15)
         ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
         ax.set_title(f"Evolução do {PARAM_MAPPING.get(param_name, param_name)}", 
                              fontsize=14, fontweight='bold', pad=20)
         
-        # Grid e estilo
+        # Grid and style
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        # Ajuste: Mudar a localização da legenda para 'lower right' para evitar sobreposição
+        # Adjustment: Change legend location to 'lower right' to avoid overlapping
         ax.legend(loc='lower right', fontsize=10, framealpha=0.25) 
         
-        # Remover bordas
+        # Remove borders
         for spine in ax.spines.values():
             spine.set_visible(False)
         
-        # Fundo gradiente
+        # Gradient background
         ax.set_facecolor('#0c0f1d')
         
         return ax
 
-    # Função para exibir resultados
+    # Function to display results
     def display_results_interpretation(results):
         st.markdown("""
         <div class="card">
@@ -559,7 +580,7 @@ def run_dermendzhieva_analysis():
             
             st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # Interface principal do módulo
+    # Main module interface
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
@@ -575,7 +596,7 @@ def run_dermendzhieva_analysis():
         del st.session_state['selected_article']
         st.rerun()
     
-    # Painel de configurações (agora na área principal)
+    # Configuration panel (now in main area)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -592,7 +613,7 @@ def run_dermendzhieva_analysis():
         use_sample = st.checkbox("Usar dados de exemplo", value=True, key="use_sample_derm")
         distribution_type = "LogNormal"
     
-    # Carregar dados ANTES de tentar acessar colunas
+    # Load data BEFORE attempting to access columns
     df = load_sample_data_with_stdev(distribution_type)
     
     with col2:
@@ -606,7 +627,7 @@ def run_dermendzhieva_analysis():
             key="param_select_derm"
         )
     
-    # Pré-visualização dos Dados (TODAS AS AMOSTRAS)
+    # Data Preview (ALL SAMPLES)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -620,7 +641,7 @@ def run_dermendzhieva_analysis():
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
     
-    # Explicação detalhada sobre a produção das amostras
+    # Detailed explanation of sample production
     st.markdown(f"""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
@@ -644,27 +665,27 @@ def run_dermendzhieva_analysis():
     
     st.divider()
 
-    # Realizar Análise
+    # Perform Analysis
     if not selected_params:
         st.warning("Selecione pelo menos um parâmetro para análise.")
         return
 
-    # Converter de volta para nomes originais
+    # Convert back to original names
     reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
     selected_original_params = [reverse_mapping.get(p, p) for p in selected_params]
     
     results = []
     days_ordered = ['Day 1', 'Day 30', 'Day 60', 'Day 90', 'Day 120']
     
-    # Configurar subplots
+    # Configure subplots
     num_plots = len(selected_params)
     
     if num_plots > 0:
-        # Criar figura com espaço adicional entre os subplots
+        # Create figure with additional space between subplots
         fig = plt.figure(figsize=(10, 6 * num_plots))
         
-        # Usar GridSpec para controlar o espaçamento
-        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)  # Espaço vertical entre gráficos
+        # Use GridSpec to control spacing
+        gs = fig.add_gridspec(num_plots, 1, hspace=0.6)  # Vertical space between graphs
         
         axes = []
         for i in range(num_plots):
@@ -674,7 +695,7 @@ def run_dermendzhieva_analysis():
         for i, param in enumerate(selected_original_params):
             param_df = df[df['Parameter'] == param]
             
-            # Coletar dados por dia
+            # Collect data by day
             data_by_day = []
             valid_days = []
             for day in days_ordered:
@@ -684,7 +705,7 @@ def run_dermendzhieva_analysis():
                         data_by_day.append(day_data)
                         valid_days.append(day)
             
-            # Executar teste de Kruskal-Wallis
+            # Perform Kruskal-Wallis test
             if len(data_by_day) >= 2:
                 try:
                     h_stat, p_val = kruskal(*data_by_day)
@@ -695,11 +716,11 @@ def run_dermendzhieva_analysis():
                         "Significativo (p<0.05)": p_val < 0.05
                     })
                     
-                    # Plotar gráfico
+                    # Plot graph
                     ax = axes[i]
                     plot_parameter_evolution(ax, data_by_day, valid_days, param)
                     
-                    # Adicionar resultado do teste
+                    # Add test result
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
                     ax.text(
                         0.5, 0.95, 
@@ -726,7 +747,7 @@ def run_dermendzhieva_analysis():
         st.warning("Nenhum parâmetro selecionado para análise.")
         return
 
-    # Resultados Estatísticos
+    # Statistical Results
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -738,16 +759,16 @@ def run_dermendzhieva_analysis():
     """, unsafe_allow_html=True)
     
     if results:
-        # Formatar a tabela de resultados
+        # Format results table
         results_df = pd.DataFrame(results)
         results_df['Significância'] = results_df['p-value'].apply(
             lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
         )
         
-        # Reordenar colunas
+        # Reorder columns
         results_df = results_df[['Parâmetro', 'H-Statistic', 'p-value', 'Significância']]
         
-        # Estilizar a tabela
+        # Style table
         st.dataframe(
             results_df.style
             .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
@@ -761,7 +782,7 @@ def run_dermendzhieva_analysis():
     else:
         st.info("Nenhum resultado estatístico disponível.")
     
-    # Gráficos
+    # Graphs
     if num_plots > 0:
         st.markdown("""
         <div class="card">
@@ -773,18 +794,18 @@ def run_dermendzhieva_analysis():
         </div>
         """, unsafe_allow_html=True)
         
-        # Adicionar espaçamento visual entre os gráficos
+        # Add visual spacing between graphs
         st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True)
         
-        # Ajustar layout com espaço adicional
+        # Adjust layout with additional space
         plt.tight_layout()
         st.pyplot(fig)
         plt.close(fig)
     
-    # Interpretação
+    # Interpretation
     display_results_interpretation(results)
     
-    # Referência Bibliográfica (Formato ABNT)
+    # Bibliographic Reference (ABNT Format)
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -813,12 +834,12 @@ def run_dermendzhieva_analysis():
     """, unsafe_allow_html=True)
 
 # ===================================================================
-# MÓDULO JORDÃO ET AL. (2007) - ANÁLISE POR DOSE
+# MODULE JORDÃO ET AL. (2007) - ANALYSIS BY DOSE
 # ===================================================================
 def run_jordao_analysis():
     """Módulo para análise de doses com geração de amostras"""
     
-    # Mapeamento de parâmetros
+    # Parameter mapping
     PARAM_MAPPING = {
         "Cu_leaves": "Cobre nas Folhas (mg/kg)",
         "Ni_leaves": "Níquel nas Folhas (mg/kg)",
@@ -828,7 +849,7 @@ def run_jordao_analysis():
         "Zn_roots": "Zinco nas Raízes (mg/kg)",
     }
     
-    # Mapeamento de doses
+    # Dose mapping
     DOSE_MAPPING = {
         'Dose 0%': 0,
         'Dose 25%': 25,
@@ -836,7 +857,7 @@ def run_jordao_analysis():
         'Dose 100%': 100
     }
 
-    # Função para carregar dados de exemplo
+    # Function to load sample data
     @st.cache_data
     def load_sample_data(distribution_type='Normal'):
         sample_data = {
@@ -893,7 +914,7 @@ def run_jordao_analysis():
                     else:
                         value = np.random.normal(stats['mean'], stats['stdev'])
                     
-                    # Garantir valores não-negativos
+                    # Ensure non-negative values
                     value = max(0, value)
                     
                     all_data.append({
@@ -904,18 +925,18 @@ def run_jordao_analysis():
                     
         return pd.DataFrame(all_data)
 
-    # Função para plotar evolução por dose
+    # Function to plot evolution by dose
     def plot_parameter_by_dose(ax, data, doses, param_name):
-        # Converter doses para numérico para ordenação
+        # Convert doses to numeric for ordering
         numeric_doses = [DOSE_MAPPING[d] for d in doses]
         
-        # Paleta de cores moderna
+        # Modern color palette
         colors = ['#6f42c1', '#00c1e0', '#00d4b1', '#ffd166']
         
         for i, (dose, num_dose) in enumerate(zip(doses, numeric_doses)):
             group_data = data[i]
             
-            # Plotar pontos individuais
+            # Plot individual points
             ax.scatter(
                 [num_dose] * len(group_data), 
                 group_data, 
@@ -929,7 +950,7 @@ def run_jordao_analysis():
                 marker='o'
             )
         
-        # Calcular e plotar medianas com estilo premium
+        # Calculate and plot medians with premium style
         medians = [np.median(group) for group in data]
         ax.plot(
             numeric_doses, 
@@ -945,36 +966,36 @@ def run_jordao_analysis():
             alpha=0.95
         )
         
-        # Adicionar linhas de referência para níveis tóxicos
+        # Add reference lines for toxic levels
         if "Zinco" in param_name and "Folhas" in param_name:
             ax.axhline(y=500, color='#ff6b6b', linestyle='--', alpha=0.7)
             ax.text(5, 520, 'Nível Tóxico', color='#ff6b6b', fontsize=10)
         
-        # Configurar eixo X com doses numéricas
+        # Configure X-axis with numeric doses
         ax.set_xticks(numeric_doses)
         ax.set_xticklabels([d.replace('Dose ', '') for d in doses], fontsize=11)
         
-        # Melhorar formatação
+        # Improve formatting
         ax.set_xlabel("Dose de Vermicomposto", fontsize=12, fontweight='bold', labelpad=15)
         ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
         ax.set_title(f"Efeito da Dose em {PARAM_MAPPING.get(param_name, param_name)}", 
                      fontsize=14, fontweight='bold', pad=20)
         
-        # Grid e estilo
+        # Grid and style
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        # Ajuste: Mudar a localização da legenda para 'lower right' para evitar sobreposição
+        # Adjustment: Change legend location to 'lower right' to avoid overlapping
         ax.legend(loc='lower right', fontsize=10, framealpha=0.25)
         
-        # Remover bordas
+        # Remove borders
         for spine in ax.spines.values():
             spine.set_visible(False)
         
-        # Fundo gradiente
+        # Gradient background
         ax.set_facecolor('#0c0f1d')
         
         return ax
 
-    # Função para exibir resultados com contexto específico
+    # Function to display results with specific context
     def display_results_interpretation(results):
         st.markdown("""
         <div class="card">
@@ -1015,7 +1036,7 @@ def run_jordao_analysis():
                 <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
             """, unsafe_allow_html=True)
             
-            # Contexto específico para metais pesados
+            # Specific context for heavy metals
             metal_context = ""
             if "Cobre" in param_name:
                 metal_context = """
@@ -1073,7 +1094,7 @@ def run_jordao_analysis():
             
             st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # Interface principal do módulo
+    # Main module interface
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
@@ -1089,7 +1110,7 @@ def run_jordao_analysis():
         del st.session_state['selected_article']
         st.rerun()
     
-    # Painel de configurações
+    # Configuration panel
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1111,10 +1132,10 @@ def run_jordao_analysis():
         )
     
     with col2:
-        # Carregar dados
+        # Load data
         df = load_sample_data(distribution_type)
         
-        # Seleção de parâmetros
+        # Parameter selection
         param_options = list(PARAM_MAPPING.keys())
         selected_params = st.multiselect(
             "Selecione os parâmetros:",
@@ -1123,7 +1144,7 @@ def run_jordao_analysis():
             key="jordao_param_select"
         )
     
-    # Pré-visualização dos dados
+    # Data preview
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1137,7 +1158,7 @@ def run_jordao_analysis():
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
     
-    # Explicação sobre geração de dados
+    # Explanation about data generation
     st.markdown(f"""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
@@ -1164,7 +1185,7 @@ def run_jordao_analysis():
     
     st.divider()
 
-    # Realizar análise
+    # Perform analysis
     if not selected_params:
         st.warning("Selecione pelo menos um parâmetro para análise.")
         return
@@ -1172,7 +1193,7 @@ def run_jordao_analysis():
     results = []
     doses_ordered = ['Dose 0%', 'Dose 25%', 'Dose 50%', 'Dose 100%']
     
-    # Configurar subplots
+    # Configure subplots
     num_plots = len(selected_params)
     
     if num_plots > 0:
@@ -1183,7 +1204,7 @@ def run_jordao_analysis():
         for i, param in enumerate(selected_params):
             param_df = df[df['Parameter'] == param]
             
-            # Coletar dados por dose
+            # Collect data by dose
             data_by_dose = []
             valid_doses = []
             for dose in doses_ordered:
@@ -1192,7 +1213,7 @@ def run_jordao_analysis():
                     data_by_dose.append(dose_data)
                     valid_doses.append(dose)
             
-            # Executar teste de Kruskal-Wallis
+            # Perform Kruskal-Wallis test
             if len(data_by_dose) >= 2:
                 try:
                     h_stat, p_val = kruskal(*data_by_dose)
@@ -1203,11 +1224,11 @@ def run_jordao_analysis():
                         "Significativo (p<0.05)": p_val < 0.05
                     })
                     
-                    # Plotar gráfico
+                    # Plot graph
                     ax = axes[i]
                     plot_parameter_by_dose(ax, data_by_dose, valid_doses, param)
                     
-                    # Adicionar resultado do teste
+                    # Add test result
                     annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
                     ax.text(
                         0.5, 0.95, 
@@ -1234,7 +1255,7 @@ def run_jordao_analysis():
         st.warning("Nenhum parâmetro selecionado para análise.")
         return
 
-    # Resultados Estatísticos
+    # Statistical Results
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1262,7 +1283,7 @@ def run_jordao_analysis():
     else:
         st.info("Nenhum resultado estatístico disponível.")
     
-    # Gráficos
+    # Graphs
     if num_plots > 0:
         st.markdown("""
         <div class="card">
@@ -1278,11 +1299,11 @@ def run_jordao_analysis():
         st.pyplot(fig)
         plt.close(fig)
     
-    # Interpretação
+    # Interpretation
     if results:
         display_results_interpretation(results)
     
-    # Referência Bibliográfica
+    # Bibliographic Reference
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1529,7 +1550,7 @@ def run_sharma_analysis():
                     <div style="background:#2a2f45;padding:10px;border-radius:8px;margin-top:10px;">
                         <b>Relevância agronômica:</b> Os vermicompostos mostraram teores significativamente 
                         maiores de nutrientes em comparação com o solo original, indicando seu potencial 
-                        como fertilizante orgânico.
+                        em fertilizante orgânico.
                     </div>
                     """, unsafe_allow_html=True)
                     
@@ -1549,7 +1570,7 @@ def run_sharma_analysis():
             
             st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # Interface principal do módulo
+    # Main module interface
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
@@ -1565,7 +1586,7 @@ def run_sharma_analysis():
         del st.session_state['selected_article']
         st.rerun()
     
-    # Painel de informações do estudo
+    # Information panel about the study
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1588,10 +1609,10 @@ def run_sharma_analysis():
     </div>
     """, unsafe_allow_html=True)
     
-    # Carregar dados
+    # Load data
     df = load_sample_data()
     
-    # Pré-visualização dos Dados
+    # Data Preview
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1605,7 +1626,7 @@ def run_sharma_analysis():
     st.dataframe(df)
     st.markdown(f"**Total de amostras:** {len(df)}")
     
-    # Explicação sobre geração de dados
+    # Explanation about data generation
     st.markdown("""
     <div class="info-card">
         <h3 style="display:flex;align-items:center;color:#00c1e0;">
@@ -1635,7 +1656,7 @@ def run_sharma_analysis():
     
     st.divider()
 
-    # Seleção de parâmetros
+    # Parameter selection
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1654,19 +1675,19 @@ def run_sharma_analysis():
         key="sharma_param_select"
     )
     
-    # Realizar Análise
+    # Perform Analysis
     if not selected_params:
         st.warning("Selecione pelo menos um parâmetro para análise.")
         return
 
-    # Converter para nomes originais
+    # Convert to original names
     reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
     selected_original_params = [reverse_mapping[p] for p in selected_params]
     
     results = []
     groups = list(GROUP_DESCRIPTIONS.keys())
     
-    # Configurar subplots
+    # Configure subplots
     num_plots = len(selected_params)
     
     if num_plots > 0:
@@ -1677,13 +1698,13 @@ def run_sharma_analysis():
         for i, param in enumerate(selected_original_params):
             param_df = df[df['Parameter'] == param]
             
-            # Coletar dados por grupo
+            # Collect data by group
             data_by_group = []
             for group in groups:
                 group_data = param_df[param_df['Group'] == group]['Value'].values
                 data_by_group.append(group_data)
             
-            # Executar teste de Kruskal-Wallis
+            # Perform Kruskal-Wallis test
             try:
                 h_stat, p_val = kruskal(*data_by_group)
                 results.append({
@@ -1693,11 +1714,11 @@ def run_sharma_analysis():
                     "Significativo (p<0.05)": p_val < 0.05
                 })
                 
-                # Plotar gráfico
+                # Plot graph
                 ax = axes[i]
                 plot_group_comparison(ax, data_by_group, groups, param)
                 
-                # Adicionar resultado do teste
+                # Add test result
                 significance = "SIGNIFICATIVO" if p_val < 0.05 else "NÃO SIGNIFICATIVO"
                 color = "#00c853" if p_val < 0.05 else "#ff5252"
                 
@@ -1721,7 +1742,7 @@ def run_sharma_analysis():
                 st.error(f"Erro ao processar {param}: {str(e)}")
                 continue
     
-    # Resultados Estatísticos
+    # Statistical Results
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1752,7 +1773,7 @@ def run_sharma_analysis():
     else:
         st.info("Nenhum resultado estatístico disponível.")
     
-    # Gráficos
+    # Graphs
     if num_plots > 0:
         st.markdown("""
         <div class="card">
@@ -1768,10 +1789,10 @@ def run_sharma_analysis():
         st.pyplot(fig)
         plt.close(fig)
     
-    # Interpretação
+    # Interpretation
     display_results_interpretation(results)
     
-    # Conclusão do estudo
+    # Study conclusion
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1795,7 +1816,7 @@ def run_sharma_analysis():
     </div>
     """, unsafe_allow_html=True)
     
-    # Referência Bibliográfica
+    # Bibliographic Reference
     st.markdown("""
     <div class="card">
         <h2 style="display:flex;align-items:center;gap:10px;">
@@ -2037,7 +2058,7 @@ def run_mago_analysis():
             
             st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # Interface principal do módulo Mago et al. (2021)
+    # Main module interface for Mago et al. (2021)
     st.markdown("""
     <div class="header-card">
         <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
@@ -2124,7 +2145,7 @@ def run_mago_analysis():
     
     st.divider()
 
-    # Realizar Análise
+    # Perform Analysis
     if not selected_params:
         st.warning("Selecione pelo menos um parâmetro para análise.")
         return
@@ -2270,6 +2291,486 @@ def run_mago_analysis():
     """, unsafe_allow_html=True)
 
 # ===================================================================
+# NOVO MÓDULO HANC ET AL. (2021) - ANÁLISE TEMPORAL DE PARÂMETROS FÍSICO-QUÍMICOS
+# ===================================================================
+def run_hanc_analysis():
+    """Módulo para análise temporal de parâmetros físico-químicos (Hanc et al., 2021)"""
+
+    # Mapeamento de parâmetros para exibição na UI
+    PARAM_MAPPING = {
+        "pH": "pH",
+        "C_N_ratio": "Razão C/N",
+        "N-NH4+": "Nitrogênio Amoniacal (N-NH₄⁺) [mg N/kg]",
+        "N-NO3-": "Nitrogênio Nitrato (N-NO₃⁻) [mg N/kg]",
+        "P_tot": "Fósforo Total (P) [mg/kg]",
+        "K_tot": "Potássio Total (K) [mg/kg]",
+    }
+
+    # Mapeamento de camadas para dias
+    LAYER_MAPPING = {
+        'IV (45 days)': 45,
+        'III (90 days)': 90,
+        'II (135 days)': 135,
+        'I (180 days)': 180
+    }
+
+    # Dados do artigo Hanc et al. (2021) - Tabela 3 e Figura 3 (estimados)
+    HANC_DATA = {
+        "pH": {
+            "Treatment 3": {'IV (45 days)': (7.2, 0), 'III (90 days)': (7.1, 0), 'II (135 days)': (7.6, 0.1), 'I (180 days)': (8.1, 0.1)},
+            "Treatment 4": {'IV (45 days)': (7.8, 0.1), 'III (90 days)': (7.9, 0), 'II (135 days)': (7.8, 0.1), 'I (180 days)': (7.8, 0)},
+            "Treatment 5": {'IV (45 days)': (7.3, 0), 'III (90 days)': (7.2, 0.1), 'II (135 days)': (7.1, 0.1), 'I (180 days)': (7.2, 0.1)},
+        },
+        "C_N_ratio": {
+            "Treatment 3": {'IV (45 days)': (11.2, 0.3), 'III (90 days)': (11.8, 0.1), 'II (135 days)': (11.1, 0.1), 'I (180 days)': (10.3, 0.2)},
+            "Treatment 4": {'IV (45 days)': (18.7, 0.7), 'III (90 days)': (14.5, 0.1), 'II (135 days)': (14.0, 0.4), 'I (180 days)': (13.6, 0.4)},
+            "Treatment 5": {'IV (45 days)': (13.6, 0.6), 'III (90 days)': (12.0, 0.2), 'II (135 days)': (10.9, 0.4), 'I (180 days)': (10.3, 0.2)},
+        },
+        "N-NH4+": {
+            "Treatment 3": {'IV (45 days)': (49.5, 0.2), 'III (90 days)': (47.2, 1.2), 'II (135 days)': (47.2, 0.4), 'I (180 days)': (45.4, 0.7)},
+            "Treatment 4": {'IV (45 days)': (46.2, 2.9), 'III (90 days)': (46.7, 1.1), 'II (135 days)': (45.3, 1.6), 'I (180 days)': (42.4, 1.2)},
+            "Treatment 5": {'IV (45 days)': (49.4, 0.7), 'III (90 days)': (45.3, 0.5), 'II (135 days)': (47.4, 0.7), 'I (180 days)': (46.9, 1.2)},
+        },
+        "N-NO3-": {
+            "Treatment 3": {'IV (45 days)': (65.2, 3.1), 'III (90 days)': (65.2, 1.4), 'II (135 days)': (48.1, 7.1), 'I (180 days)': (33.6, 1.5)},
+            "Treatment 4": {'IV (45 days)': (6.7, 2.4), 'III (90 days)': (13.8, 0.7), 'II (135 days)': (5.3, 0.8), 'I (180 days)': (8.0, 0.8)},
+            "Treatment 5": {'IV (45 days)': (4.9, 0.3), 'III (90 days)': (85.7, 0.7), 'II (135 days)': (58.4, 0.5), 'I (180 days)': (80.3, 1.1)},
+        },
+        # Valores estimados da Figura 3 (P_tot e K_tot)
+        "P_tot": { # mg/kg
+            "Treatment 3": {'IV (45 days)': (2500, 100), 'III (90 days)': (1800, 90), 'II (135 days)': (2900, 120), 'I (180 days)': (2700, 110)},
+            "Treatment 4": {'IV (45 days)': (1000, 50), 'III (90 days)': (800, 40), 'II (135 days)': (1300, 60), 'I (180 days)': (1100, 55)},
+            "Treatment 5": {'IV (45 days)': (1500, 80), 'III (90 days)': (1300, 65), 'II (135 days)': (1900, 95), 'I (180 days)': (1500, 75)},
+        },
+        "K_tot": { # mg/kg
+            "Treatment 3": {'IV (45 days)': (20500, 500), 'III (90 days)': (18000, 450), 'II (135 days)': (20000, 500), 'I (180 days)': (19500, 480)},
+            "Treatment 4": {'IV (45 days)': (11000, 300), 'III (90 days)': (9000, 250), 'II (135 days)': (10000, 280), 'I (180 days)': (10500, 290)},
+            "Treatment 5": {'IV (45 days)': (17000, 600), 'III (90 days)': (16000, 550), 'II (135 days)': (22000, 700), 'I (180 days)': (19000, 650)},
+        },
+    }
+
+    # Descrições dos tratamentos
+    TREATMENT_DESCRIPTIONS_HANC = {
+        "Treatment 3": "50% Borra de Café + 50% Palha (Com minhocas)",
+        "Treatment 4": "25% Borra de Café + 75% Palha (Com minhocas)",
+        "Treatment 5": "50% Borra de Café + 50% Palha (Sem minhocas)"
+    }
+
+    @st.cache_data
+    def load_hanc_data(num_replications=3):
+        all_data = []
+        for param_name, treatments_data in HANC_DATA.items():
+            for treatment_name, layers_data in treatments_data.items():
+                for layer_name, (mean, stdev) in layers_data.items():
+                    for _ in range(num_replications):
+                        sim_stdev = stdev if stdev is not None else (mean * 0.05 if mean != 0 else 0.01) # Estimativa se SD é None
+                        value = np.random.normal(mean, sim_stdev)
+                        
+                        # Garantir valores fisicamente possíveis (não-negativos, pH entre 0-14)
+                        if param_name == "pH":
+                            value = np.clip(value, 0, 14)
+                        else:
+                            value = max(0.0, value)
+                        
+                        all_data.append({
+                            "Parameter": param_name,
+                            "Treatment": treatment_name,
+                            "Layer": layer_name,
+                            "Value": value
+                        })
+        return pd.DataFrame(all_data)
+
+    def plot_hanc_parameter_evolution(ax, data_by_layer, layers_ordered, param_name, treatment_name):
+        numeric_layers = [LAYER_MAPPING[l] for l in layers_ordered]
+        
+        # Paleta de cores moderna (uma cor para cada tratamento na plotagem multi-linha)
+        # Como estamos plotando para UM tratamento por vez, a cor será fixa para este tratamento
+        colors = {
+            "Treatment 3": '#6f42c1',
+            "Treatment 4": '#00c1e0',
+            "Treatment 5": '#ffd166'
+        }
+        current_color = colors.get(treatment_name, '#a0a7c0') # Cor padrão
+
+        for i, (layer, num_layer) in enumerate(zip(layers_ordered, numeric_layers)):
+            group_data = data_by_layer[i]
+            
+            ax.scatter(
+                [num_layer] * len(group_data), 
+                group_data, 
+                alpha=0.85, 
+                s=100,
+                color=current_color,
+                edgecolors='white',
+                linewidth=1.2,
+                zorder=3,
+                label=f"Camada {layer.split(' ')[1]}", # "45 days", "90 days", etc.
+                marker='o'
+            )
+        
+        # Calcular e plotar medianas com estilo premium
+        medians = [np.median(group) for group in data_by_layer]
+        ax.plot(
+            numeric_layers, 
+            medians, 
+            'D-', 
+            markersize=10,
+            linewidth=3,
+            color='#ffffff', # Linha branca para as medianas
+            markerfacecolor=current_color, # Marcador com a cor do tratamento
+            markeredgecolor='white',
+            markeredgewidth=1.5,
+            zorder=5,
+            alpha=0.95,
+            label=f"Mediana ({TREATMENT_DESCRIPTIONS_HANC[treatment_name]})" # Adicionar label aqui
+        )
+        
+        ax.set_xticks(numeric_layers)
+        ax.set_xticklabels([f"{LAYER_MAPPING[l]} dias" for l in layers_ordered], fontsize=11)
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        ax.set_xlabel("Idade da Camada (Dias)", fontsize=12, fontweight='bold', labelpad=15)
+        ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
+        ax.set_title(f"Evolução de {PARAM_MAPPING.get(param_name, param_name)} - {TREATMENT_DESCRIPTIONS_HANC[treatment_name]}", 
+                     fontsize=14, fontweight='bold', pad=20)
+        
+        ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
+        ax.legend(loc='lower right', fontsize=9, framealpha=0.25) 
+        
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        
+        ax.set_facecolor('#0c0f1d')
+        
+        return ax
+
+    def display_hanc_interpretation(results):
+        st.markdown("""
+        <div class="card">
+            <h2 style="display:flex;align-items:center;gap:10px;">
+                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                    📝 Interpretação dos Resultados - Hanc et al. (2021)
+                </span>
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if not results:
+            st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
+            return
+        
+        for res in results:
+            param_name = res["Parâmetro"]
+            treatment_name = res["Tratamento"]
+            p_val = res["p-value"]
+            is_significant = p_val < 0.05
+            
+            card_class = "signif-card" if is_significant else "not-signif-card"
+            icon = "✅" if is_significant else "❌"
+            title_color = "#00c853" if is_significant else "#ff5252"
+            status = "Significativo" if is_significant else "Não Significativo"
+            
+            st.markdown(f"""
+            <div class="result-card {card_class}">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="font-size:28px; color:{title_color};">{icon}</div>
+                        <h3 style="margin:0; color:{title_color}; font-weight:600;">{param_name} ({TREATMENT_DESCRIPTIONS_HANC[treatment_name]})</h3>
+                    </div>
+                    <div style="background:rgba(42, 47, 69, 0.7); padding:8px 18px; border-radius:30px; border:1px solid {title_color}30;">
+                        <span style="font-weight:bold; font-size:1.1rem; color:{title_color};">{status}</span>
+                        <span style="color:#a0a7c0; margin-left:8px;">p = {p_val:.4f}</span>
+                    </div>
+                </div>
+                <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
+            """, unsafe_allow_html=True)
+            
+            if is_significant:
+                st.markdown(f"""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        <b>Rejeitamos a hipótese nula (H₀) para {TREATMENT_DESCRIPTIONS_HANC[treatment_name]}.</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        Há evidências de que os valores do parâmetro {param_name} mudam significativamente ao longo do tempo (camadas) neste tratamento.
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#00c853; font-size:1.5rem;">•</span>
+                        Isso indica uma dinâmica de alteração do composto ao longo do processo de vermicompostagem para esta formulação.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="color:#e0e5ff; line-height:1.8;">
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        <b>Aceitamos a hipótese nula (H₀) para {TREATMENT_DESCRIPTIONS_HANC[treatment_name]}.</b>
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        Não há evidências suficientes de mudanças significativas nos valores do parâmetro {param_name} ao longo do tempo (camadas) neste tratamento.
+                    </p>
+                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
+                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
+                        Isso sugere que o parâmetro se manteve relativamente estável para esta formulação durante o período de observação.
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
+
+    # Interface principal do módulo Hanc et al. (2021)
+    st.markdown("""
+    <div class="header-card">
+        <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
+            ☕ Análise Temporal de Parâmetros Físico-Químicos (Borra de Café)
+        </h1>
+        <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
+        Hanc et al. (2021) - Conversão de borra de café em vermicomposto
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("← Voltar para seleção de artigos"):
+        del st.session_state['selected_article']
+        st.rerun()
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                ⚙️ Configurações de Análise
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("Os dados são carregados e simulados a partir da Tabela 3 e Figura 3 do artigo.")
+    
+    with col2:
+        param_options = list(PARAM_MAPPING.values())
+        selected_params = st.multiselect(
+            "Selecione os parâmetros para análise:",
+            options=param_options,
+            default=param_options, # Seleciona todos por padrão
+            key="hanc_param_select"
+        )
+    
+    df_hanc = load_hanc_data()
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                🔍 Pré-visualização dos Dados (Simulados)
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.dataframe(df_hanc)
+    st.markdown(f"**Total de amostras simuladas:** {len(df_hanc)}")
+
+    st.markdown("""
+    <div class="info-card">
+        <h3 style="display:flex;align-items:center;color:#00c1e0;">
+            <span class="info-icon">ℹ️</span> Metodologia de Análise
+        </h3>
+        <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
+            <p>
+                Os dados para esta análise foram extraídos da <b>Tabela 3</b> (pH, C/N, N-NH₄⁺, N-NO₃⁻) e 
+                <b>Figura 3</b> (Fósforo e Potássio totais) do artigo de Hanc et al. (2021). 
+                Para permitir a análise estatística, foram simuladas <b>3 réplicas</b> para cada valor médio de parâmetro, 
+                tratamento e camada, utilizando uma distribuição normal com base nos desvios padrão fornecidos 
+                ou estimados (para a Figura 3).
+            </p>
+            <p>
+                <b>Camadas e Idades de Amostragem:</b>
+                <ul>
+                    <li><b>Camada IV:</b> 45 dias</li>
+                    <li><b>Camada III:</b> 90 dias</li>
+                    <li><b>Camada II:</b> 135 dias</li>
+                    <li><b>Camada I:</b> 180 dias</li>
+                </ul>
+            </p>
+            <p>
+                <b>Tratamentos Analisados:</b>
+                <ul>
+                    <li><b>Treatment 3:</b> 50% Borra de Café + 50% Palha (Com minhocas)</li>
+                    <li><b>Treatment 4:</b> 25% Borra de Café + 75% Palha (Com minhocas)</li>
+                    <li><b>Treatment 5:</b> 50% Borra de Café + 50% Palha (Sem minhocas)</li>
+                </ul>
+            </p>
+            <p>
+                Para cada parâmetro selecionado, o teste de Kruskal-Wallis foi aplicado para verificar 
+                se existem diferenças significativas nos valores ao longo do tempo (entre as camadas) 
+                para cada tratamento individualmente.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.divider()
+
+    # Realizar Análise
+    if not selected_params:
+        st.warning("Selecione pelo menos um parâmetro para análise.")
+        return
+
+    reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
+    selected_original_params = [reverse_mapping[p] for p in selected_params]
+    
+    results = []
+    layers_ordered = list(LAYER_MAPPING.keys())
+    treatments_to_analyze = list(TREATMENT_DESCRIPTIONS_HANC.keys())
+
+    # Contar o número total de plots que serão gerados para ajustar o tamanho da figura
+    # num_plots_total = len(selected_original_params) * len(treatments_to_analyze)
+    # Ajuste: Criar uma figura por tratamento para melhor organização visual
+    
+    for treatment in treatments_to_analyze:
+        st.markdown(f"""
+        <div class="card">
+            <h2 style="display:flex;align-items:center;gap:10px;">
+                <span style="background:linear-gradient(135deg, #00c1e0 0%, #00d4b1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                    📈 Evolução dos Parâmetros para {TREATMENT_DESCRIPTIONS_HANC[treatment]}
+                </span>
+            </h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Criar uma figura e eixos para cada tratamento
+        fig, axes = plt.subplots(len(selected_original_params), 1, figsize=(10, 6 * len(selected_original_params)), hspace=0.6)
+        # Se houver apenas um subplot, axes não será um array
+        if len(selected_original_params) == 1:
+            axes = [axes] # Coloca em uma lista para iterar consistentemente
+
+        for i, param in enumerate(selected_original_params):
+            param_df_by_treatment = df_hanc[(df_hanc['Parameter'] == param) & (df_hanc['Treatment'] == treatment)]
+            
+            data_by_layer = []
+            for layer in layers_ordered:
+                layer_data = param_df_by_treatment[param_df_by_treatment['Layer'] == layer]['Value'].dropna().values
+                if len(layer_data) > 0:
+                    data_by_layer.append(layer_data)
+                else:
+                    data_by_layer.append(np.array([])) # Adiciona um array vazio se não houver dados
+
+            valid_data_for_kruskal = [d for d in data_by_layer if len(d) > 0]
+            
+            if len(valid_data_for_kruskal) >= 2:
+                try:
+                    h_stat, p_val = kruskal(*valid_data_for_kruskal)
+                    results.append({
+                        "Parâmetro": PARAM_MAPPING[param],
+                        "Tratamento": treatment,
+                        "H-Statistic": h_stat,
+                        "p-value": p_val,
+                        "Significativo (p<0.05)": p_val < 0.05
+                    })
+                    
+                    ax = axes[i]
+                    plot_hanc_parameter_evolution(ax, data_by_layer, layers_ordered, param, treatment)
+                    
+                    annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
+                    ax.text(
+                        0.5, 0.95, 
+                        annotation_text,
+                        transform=ax.transAxes,
+                        ha='center',
+                        va='top',
+                        fontsize=11,
+                        color='white',
+                        bbox=dict(
+                            boxstyle="round,pad=0.3",
+                            facecolor='#2a2f45',
+                            alpha=0.8,
+                            edgecolor='none'
+                        )
+                    )
+                except Exception as e:
+                    st.error(f"Erro ao processar {param} para {treatment}: {str(e)}")
+                    continue
+            else:
+                st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)} para o tratamento {TREATMENT_DESCRIPTIONS_HANC[treatment]} para realizar o teste de Kruskal-Wallis.")
+                ax = axes[i]
+                plot_hanc_parameter_evolution(ax, data_by_layer, layers_ordered, param, treatment)
+
+        st.pyplot(fig)
+        plt.close(fig) # Fecha a figura para liberar memória
+        st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True) # Espaçamento entre blocos de tratamento
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                📊 Resultados Estatísticos Consolidado
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if results:
+        results_df = pd.DataFrame(results)
+        results_df['Significância'] = results_df['p-value'].apply(
+            lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
+        )
+        
+        # Mapear Treatment para descrição completa
+        results_df['Tratamento'] = results_df['Tratamento'].map(TREATMENT_DESCRIPTIONS_HANC)
+
+        results_df = results_df[['Parâmetro', 'Tratamento', 'H-Statistic', 'p-value', 'Significância']]
+        
+        st.dataframe(
+            results_df.style
+            .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
+            .set_properties(**{
+                'color': 'white',
+                'background-color': '#131625',
+            })
+            .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
+                               if x['Significância'] == "✅ Sim" else '' for i in x], axis=1)
+        )
+    else:
+        st.info("Nenhum resultado estatístico disponível.")
+    
+    display_hanc_interpretation(results)
+
+    st.markdown("""
+    <div class="card">
+        <h2 style="display:flex;align-items:center;gap:10px;">
+            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
+                📚 Referência Bibliográfica
+            </span>
+        </h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="reference-card">
+        <p style="line-height:1.8; text-align:justify;">
+            HANC, A.; HREBECKOVA, T.; GRASSEROVA, A.; CAJTHAML, T. 
+            Conversion of spent coffee grounds into vermicompost. 
+            <strong>Bioresource Technology</strong>, 
+            v. 341, p. 125925, 2021.
+        </p>
+        <p style="margin-top:10px;">
+            <strong>DOI:</strong> 10.1016/j.biortech.2021.125925
+        </p>
+        <p style="margin-top:15px; font-style:italic;">
+            Nota: Os dados de Fósforo e Potássio foram estimados visualmente da Figura 3. 
+            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ===================================================================
 # ROTEADOR PRINCIPAL
 # ===================================================================
 def main():
@@ -2286,8 +2787,10 @@ def main():
         run_jordao_analysis()
     elif st.session_state['selected_article'] == 'sharma':
         run_sharma_analysis()
-    elif st.session_state['selected_article'] == 'mago': # Novo roteamento
+    elif st.session_state['selected_article'] == 'mago':
         run_mago_analysis()
+    elif st.session_state['selected_article'] == 'hanc': # Novo roteamento para Hanc
+        run_hanc_analysis()
 
 if __name__ == "__main__":
     main()
