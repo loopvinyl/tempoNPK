@@ -3,173 +3,175 @@ import pandas as pd
 import numpy as np
 from scipy.stats import kruskal
 import matplotlib.pyplot as plt
-import seaborn as sns
-import tabula
-import base64
 
-# Configurações gerais
-st.set_page_config(page_title="Análise Estatística de Vermicompostagem", layout="wide")
-st.title("📊 Análise Estatística de Parâmetros de Vermicomposto")
-st.markdown("""
-**Aplicação para análise de diferenças significativas em parâmetros de vermicomposto ao longo do tempo**  
-Utiliza o teste de Kruskal-Wallis (não paramétrico) para pequenas amostras.
-""")
+# Configuração inicial
+st.set_page_config(page_title="Análise de Vermicompostos", layout="wide", page_icon="🪱")
 
-# Função para carregar dados de exemplo
-def load_sample_data():
-    """Dados de exemplo baseados no artigo DERMENDZHIEVA et al. (2021)"""
-    return pd.DataFrame({
-        'Parameter': ['TKN (gkg⁻¹)', 'TKN (gkg⁻¹)', 'TKN (gkg⁻¹)', 'TKN (gkg⁻¹)', 'TKN (gkg⁻¹)',
-                      'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)', 'Total P (gkg⁻¹)',
-                      'TK (gkg⁻¹)', 'TK (gkg⁻¹)', 'TK (gkg⁻¹)', 'TK (gkg⁻¹)', 'TK (gkg⁻¹)',
-                      'pH (H₂O)', 'pH (H₂O)', 'pH (H₂O)', 'pH (H₂O)', 'pH (H₂O)',
-                      'C/N ratio', 'C/N ratio', 'C/N ratio', 'C/N ratio', 'C/N ratio'],
-        'Substrate': ['VC-M']*25,
-        'Day 1': [20.8, 12.1, 1.28, 7.04, 11.2] * 5,
-        'Day 30': [21.2, 13.0, 1.24, 5.60, 10.9] * 5,
-        'Day 60': [22.8, 13.9, 1.30, 5.56, 9.67] * 5,
-        'Day 90': [23.3, 14.6, 1.34, 5.27, 9.65] * 5,
-        'Day 120': [25.5, 15.3, 1.45, 5.78, 7.91] * 5
-    })
-
-# Função principal
-def main():
-    # Upload do PDF ou uso de dados de exemplo
-    st.sidebar.header("Opções de Dados")
-    use_sample = st.sidebar.checkbox("Usar dados de exemplo", value=True)
-    
-    if use_sample:
-        df = load_sample_data()
-        st.sidebar.success("Usando dados de exemplo do artigo DERMENDZHIEVA et al. (2021)")
-    else:
-        uploaded_file = st.sidebar.file_uploader("Carregue o artigo PDF", type="pdf")
-        if not uploaded_file:
-            st.info("Por favor, carregue um PDF ou marque 'Usar dados de exemplo'")
-            return
-            
-        st.sidebar.info(f"Arquivo carregado: {uploaded_file.name}")
-        try:
-            # Extrair tabela da página 4
-            tables = tabula.read_pdf(uploaded_file, pages=4, multiple_tables=True)
-            df = tables[0]
-            st.sidebar.success("Tabela extraída com sucesso!")
-        except Exception as e:
-            st.sidebar.error(f"Erro na extração: {str(e)}")
-            st.error("Não foi possível extrair a tabela. Usando dados de exemplo.")
-            df = load_sample_data()
-
-    # Pré-processamento dos dados
-    st.header("Pré-visualização dos Dados")
-    st.dataframe(df.head())
-    
-    # Selecionar parâmetros para análise
-    st.sidebar.header("Configuração de Análise")
-    parameters = st.sidebar.multiselect(
-        "Selecione os parâmetros para análise:",
-        options=["Nitrogênio (N)", "Fósforo (P)", "Potássio (K)", "pH", "Relação C/N"],
-        default=["Nitrogênio (N)", "Fósforo (P)", "pH"]
-    )
-    
-    # Mapeamento de parâmetros para colunas
-    param_mapping = {
-        "Nitrogênio (N)": "TKN (gkg⁻¹)",
-        "Fósforo (P)": "Total P (gkg⁻¹)",
-        "Potássio (K)": "TK (gkg⁻¹)",
-        "pH": "pH (H₂O)",
-        "Relação C/N": "C/N ratio"
+# =====================================================
+# Funções auxiliares
+# =====================================================
+@st.cache_data
+def load_sample_data_with_stdev(distribution_type='LogNormal'):
+    """
+    Gera dados de amostra simulados com base em médias e desvios padrão
+    inspirados no artigo DERMENDZHIEVA et al. (2021) para N, P, K, pH e C:N Ratio.
+    Utiliza uma distribuição log-normal.
+    """
+    # Dados de exemplo (substitua pelos dados EXATOS do artigo DERMENDZHIEVA et al. (2021))
+    stats = {
+        'TKN': {'Day 1': (20.8, 0.5), 'Day 30': (21.5, 0.6), 'Day 60': (22.2, 0.7), 'Day 90': (23.0, 0.8), 'Day 120': (24.5, 0.9)},
+        'P': {'Day 1': (12.1, 0.3), 'Day 30': (12.8, 0.4), 'Day 60': (13.5, 0.4), 'Day 90': (14.2, 0.5), 'Day 120': (15.0, 0.6)},
+        'K': {'Day 1': (1.28, 0.02), 'Day 30': (1.29, 0.02), 'Day 60': (1.30, 0.02), 'Day 90': (1.31, 0.02), 'Day 120': (1.32, 0.03)},
+        'pH': {'Day 1': (7.5, 0.2), 'Day 30': (7.2, 0.2), 'Day 60': (7.0, 0.1), 'Day 90': (6.9, 0.1), 'Day 120': (6.8, 0.1)},
+        'C:N Ratio': {'Day 1': (25.0, 1.5), 'Day 30': (20.0, 1.2), 'Day 60': (15.0, 1.0), 'Day 90': (12.0, 0.8), 'Day 120': (10.0, 0.7)},
     }
-    
-    # Realizar testes estatísticos
-    results = []
-    fig, axes = plt.subplots(len(parameters), 1, figsize=(10, 5*len(parameters)))
-    if len(parameters) == 1:
-        axes = [axes]
-    
-    for i, param in enumerate(parameters):
-        col_name = param_mapping[param]
-        param_df = df[df['Parameter'] == col_name]
-        
-        # Extrair dados para cada dia
-        days = ['Day 1', 'Day 30', 'Day 60', 'Day 90', 'Day 120']
-        data = [param_df[day].values for day in days]
-        
-        # Teste de Kruskal-Wallis
-        h_stat, p_val = kruskal(*data)
-        results.append({
-            "Parâmetro": param,
-            "H-Statistic": h_stat,
-            "p-value": p_val,
-            "Significativo (p<0.05)": p_val < 0.05
-        })
-        
-        # Criar gráfico
-        ax = axes[i]
-        for j, day_data in enumerate(data):
-            ax.scatter([j]*len(day_data), day_data, alpha=0.6, label=f"Dia {[1,30,60,90,120][j]}")
-        
-        # Adicionar linha de tendência
-        medians = [np.median(day_data) for day_data in data]
-        ax.plot(medians, 'ro-', markersize=8)
-        
-        ax.set_title(f"Evolução do {param}")
-        ax.set_ylabel(param.split('(')[0].strip())
-        ax.set_xticks(range(5))
-        ax.set_xticklabels(['1', '30', '60', '90', '120'])
-        ax.grid(True, alpha=0.3)
-        ax.legend()
-        
-        # Adicionar resultado do teste ao gráfico
-        ax.annotate(f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}",
-                    xy=(0.5, 0.05), xycoords='axes fraction',
-                    ha='center', fontsize=9,
-                    bbox=dict(boxstyle="round,pad=0.3", fc="yellow", alpha=0.3))
 
-    # Mostrar resultados estatísticos
-    st.header("Resultados Estatísticos")
-    results_df = pd.DataFrame(results)
-    st.dataframe(results_df.style.apply(
-        lambda x: ['background-color: #fffd8e' if x['p-value'] < 0.05 else '' for _ in x], 
-        axis=1
-    ))
+    data = []
+    num_samples_per_day = 5 # Número de amostras simuladas por dia de tratamento
+
+    for param, days_stats in stats.items():
+        for day, (mean_orig, std_orig) in days_stats.items():
+            if distribution_type == 'LogNormal':
+                # Converte média e desvio padrão para os parâmetros da distribuição log-normal
+                # Evita divisão por zero se std_orig for 0, embora improvável para dados reais
+                if mean_orig <= 0:
+                    st.error(f"Média original ({mean_orig}) para {param} no {day} deve ser positiva para LogNormal.")
+                    continue
+                if std_orig < 0:
+                    st.error(f"Desvio padrão original ({std_orig}) para {param} no {day} não pode ser negativo.")
+                    continue
+                    
+                # Caso o desvio padrão seja zero, a distribuição log-normal degenera para um único valor (a média)
+                if std_orig == 0:
+                    values = np.full(num_samples_per_day, mean_orig)
+                else:
+                    mu_log = np.log(mean_orig**2 / np.sqrt(std_orig**2 + mean_orig**2))
+                    sigma_log = np.sqrt(np.log(1 + (std_orig**2 / mean_orig**2)))
+                    values = np.random.lognormal(mu_log, sigma_log, num_samples_per_day)
+            else: # Default para Normal ou outro, embora o foco seja LogNormal aqui
+                values = np.random.normal(mean_orig, std_orig, num_samples_per_day)
+
+            for val in values:
+                data.append({
+                    'Parameter': param,
+                    'Treatment': day,
+                    'Value': val
+                })
+    return pd.DataFrame(data)
+
+def display_results_dermendzhieva():
+    st.header("Análise Estatística - DERMENDZHIEVA et al. (2021) 📚")
+    st.write("Esta seção simula a análise dos parâmetros N, P, K, pH e C:N Ratio ao longo do tempo (dias 1, 30, 60, 90, 120) usando dados inspirados no artigo de Dermendzhieva et al. (2021). Os dados são gerados com uma distribuição log-normal e o teste de Kruskal-Wallis é aplicado.")
+
+    df = load_sample_data_with_stdev(distribution_type='LogNormal')
+
+    st.subheader("Parâmetros Disponíveis:")
+    options = df['Parameter'].unique().tolist()
     
-    # Mostrar gráficos
-    st.header("Evolução Temporal dos Parâmetros")
-    st.pyplot(fig)
-    
-    # Interpretação dos resultados
-    st.header("Interpretação dos Resultados")
-    for res in results:
-        st.subheader(res["Parâmetro"])
-        if res["p-value"] < 0.05:
-            st.success(f"✅ Diferenças estatisticamente significativas (p = {res['p-value']:.4f})")
-            st.markdown("""
-            - **Rejeitamos a hipótese nula (H₀)**
-            - Há evidências de que os valores do parâmetro mudam significativamente ao longo do tempo
-            - A vermicompostagem afeta este parâmetro
-            """)
+    # Pre-seleciona todos os parâmetros para esta análise específica
+    selected = st.multiselect("Selecione os parâmetros para análise:", options=options, default=options) 
+    if not selected:
+        st.warning("Selecione ao menos um parâmetro.")
+        return
+
+    st.subheader("🔍 Dados Simulados")
+    st.dataframe(df)
+
+    st.subheader("📈 Resultados Estatísticos (Teste de Kruskal-Wallis)")
+    results = []
+    for param in selected:
+        param_data = []
+        labels = []
+        for treat in df['Treatment'].unique():
+            vals = df[(df['Parameter'] == param) & (df['Treatment'] == treat)]['Value'].dropna().values
+            if len(vals) > 1: # Precisa de pelo menos 2 pontos para calcular Kruskal
+                param_data.append(vals)
+                labels.append(treat)
+        
+        # O teste de Kruskal-Wallis requer pelo menos 2 grupos para comparação
+        if len(param_data) >= 2:
+            try:
+                h, p = kruskal(*param_data)
+                results.append((param, h, p))
+            except ValueError as e:
+                st.warning(f"Erro ao calcular Kruskal-Wallis para {param}: {e}. Verifique se há variância nos dados.")
         else:
-            st.warning(f"❌ Sem diferenças significativas (p = {res['p-value']:.4f})")
-            st.markdown("""
-            - **Aceitamos a hipótese nula (H₀)**
-            - Não há evidências suficientes de mudanças significativas
-            - O parâmetro permanece estável durante o processo
-            """)
+            st.info(f"Dados insuficientes para realizar o teste de Kruskal-Wallis para '{param}'. Necessita de dados para ao menos dois 'Treatments'.")
+
+    if results:
+        res_df = pd.DataFrame(results, columns=["Parâmetro", "H (estatística)", "p-valor"])
+        st.dataframe(res_df)
+
+        st.subheader("Interpretação dos Resultados:")
+        for _, row in res_df.iterrows():
+            param = row["Parâmetro"]
+            p_value = row["p-valor"]
+            st.write(f"**Parâmetro: {param}**")
+            if p_value < 0.05:
+                st.success(f"✅ Diferenças estatisticamente significativas (p = {p_value:.4f})")
+                st.markdown("""
+                - **Rejeitamos a hipótese nula (H₀)**: As distribuições dos valores do parâmetro *não* são as mesmas em todos os dias de tratamento.
+                - Há evidências de que os valores do parâmetro **mudam significativamente ao longo do tempo** de vermicompostagem.
+                """)
+            else:
+                st.warning(f"❌ Sem diferenças estatisticamente significativas (p = {p_value:.4f})")
+                st.markdown("""
+                - **Aceitamos a hipótese nula (H₀)**: As distribuições dos valores do parâmetro são as mesmas em todos os dias de tratamento.
+                - Não há evidências suficientes para afirmar que os valores do parâmetro **mudam significativamente ao longo do tempo** de vermicompostagem. O parâmetro permanece estável durante o processo.
+                """)
+        
+        # Plotting results
+        st.subheader("📊 Visualização dos Dados por Parâmetro")
+        for param in selected:
+            fig, ax = plt.subplots(figsize=(10, 6))
+            param_df = df[df['Parameter'] == param]
+            
+            # Ordenar os "Treatments" para o plot (Day 1, Day 30, etc.)
+            treatment_order = [f'Day {d}' for d in [1, 30, 60, 90, 120]]
+            param_df['Treatment'] = pd.Categorical(param_df['Treatment'], categories=treatment_order, ordered=True)
+            param_df = param_df.sort_values('Treatment')
+
+            # Boxplot para visualizar a distribuição
+            sns.boxplot(x='Treatment', y='Value', data=param_df, ax=ax)
+            sns.stripplot(x='Treatment', y='Value', data=param_df, color='black', size=4, jitter=True, ax=ax) # Adiciona pontos individuais
+            ax.set_title(f'Distribuição de {param} ao Longo do Tempo')
+            ax.set_xlabel('Dia de Tratamento')
+            ax.set_ylabel(param)
+            st.pyplot(fig)
+            plt.close(fig) # Fecha a figura para liberar memória
+    else:
+        st.info("Nenhum resultado estatístico disponível para os parâmetros selecionados.")
+
+
+# =====================================================
+# Roteamento principal
+# =====================================================
+def main():
+    if 'selected_article' not in st.session_state:
+        st.session_state['selected_article'] = None
+
+    st.sidebar.title("Navegação")
+    if st.sidebar.button("Análise DERMENDZHIEVA et al. (2021) 📖"):
+        st.session_state['selected_article'] = 'dermendzhieva'
     
-    # Explicação metodológica
-    st.sidebar.header("Sobre a Metodologia")
-    st.sidebar.info("""
-    **Teste de Kruskal-Wallis:**
-    - Teste não paramétrico equivalente à ANOVA
-    - Usado quando os dados não atendem aos pressupostos de normalidade
-    - Adequado para pequenas amostras (n = 3 neste estudo)
-    
-    **Hipóteses:**
-    - H₀: As distribuições são iguais em todos os grupos
-    - H₁: Pelo menos um grupo difere dos demais
-    
-    **Significância:**
-    - p < 0.05 → Rejeita H₀ (diferenças significativas)
-    """)
+    # Espaço para futuros artigos
+    # if st.sidebar.button("Análise ARTIGO_2 (ANO)"):
+    #     st.session_state['selected_article'] = 'artigo_2'
+
+    if st.session_state['selected_article'] == 'dermendzhieva':
+        display_results_dermendzhieva()
+    # elif st.session_state['selected_article'] == 'artigo_2':
+    #     # future function for article 2
+    #     st.write("Análise para Artigo 2 (em desenvolvimento)...")
+    else:
+        st.info("Selecione um artigo para começar a análise.")
+        st.markdown("---")
+        st.subheader("Bem-vindo à Análise de Vermicompostos! 🪱")
+        st.write("Esta aplicação permite simular e analisar dados de parâmetros de vermicompostagem.")
+        st.write("Comece selecionando um artigo na barra lateral para ver a análise estatística dos dados simulados.")
+        st.write("O objetivo é ajudar a interpretar diferenças significativas em parâmetros químicos ao longo do tempo, utilizando testes não paramétricos como o Kruskal-Wallis.")
+        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Vermicompost_pile.jpg/640px-Vermicompost_pile.jpg", caption="Exemplo de Vermicompostagem", use_column_width=True)
+
 
 if __name__ == "__main__":
     main()
