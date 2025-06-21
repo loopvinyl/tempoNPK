@@ -13,7 +13,7 @@ st.set_page_config(
     page_icon="📊"
 )
 
-# CSS para tema escuro premium
+# CSS para tema escuro premium com cards clicáveis
 st.markdown("""
 <style>
     /* Configurações gerais */
@@ -35,8 +35,8 @@ st.markdown("""
         margin-bottom: 28px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(100, 110, 200, 0.2);
-        transition: all 0.3s ease;
         cursor: pointer;
+        transition: all 0.3s ease;
     }
     
     .card:hover {
@@ -154,23 +154,18 @@ st.markdown("""
         border-radius: 4px;
         font-family: monospace;
     }
-    
-    /* Botões invisíveis para os cards */
-    .card-button {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-        z-index: 2;
-    }
-    
-    .card-container {
-        position: relative;
-    }
 </style>
+""", unsafe_allow_html=True)
+
+# JavaScript para tornar os cards clicáveis
+st.markdown("""
+<script>
+    // Função para selecionar artigo
+    function selectArticle(article) {
+        // Enviar o comando para o Streamlit
+        Streamlit.setComponentValue(article);
+    }
+</script>
 """, unsafe_allow_html=True)
 
 # Configurar matplotlib para tema escuro premium
@@ -210,45 +205,37 @@ def show_homepage():
     
     with col1:
         # Card clicável para Dermendzhieva
-        container = st.container()
-        container.markdown("""
-        <div class="card-container">
-            <div class="card">
-                <h2 style="color:#e0e5ff;">Dermendzhieva et al. (2021)</h2>
-                <p style="color:#a0a7c0;">Análise temporal de parâmetros de vermicomposto</p>
-                <ul class="custom-list">
-                    <li>Evolução ao longo de 120 dias</li>
-                    <li>Parâmetros: TKN, Fósforo, Potássio</li>
-                    <li>Teste de Kruskal-Wallis</li>
-                </ul>
-            </div>
+        st.markdown("""
+        <div class="card" onclick="selectArticle('dermendzhieva')">
+            <h2 style="color:#e0e5ff;">Dermendzhieva et al. (2021)</h2>
+            <p style="color:#a0a7c0;">Análise temporal de parâmetros de vermicomposto</p>
+            <ul class="custom-list">
+                <li>Evolução ao longo de 120 dias</li>
+                <li>Parâmetros: TKN, Fósforo, Potássio</li>
+                <li>Teste de Kruskal-Wallis</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
-        
-        if container.button(" ", key="btn_dermendzhieva", help="Selecionar artigo de Dermendzhieva"):
-            st.session_state['selected_article'] = 'dermendzhieva'
-            st.rerun()
     
     with col2:
         # Card clicável para Jordão
-        container = st.container()
-        container.markdown("""
-        <div class="card-container">
-            <div class="card">
-                <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
-                <p style="color:#a0a7c0;">Remoção de metais pesados e cultivo de alface</p>
-                <ul class="custom-list">
-                    <li>Comparação entre doses de vermicomposto</li>
-                    <li>Metais: Cobre, Níquel, Zinco</li>
-                    <li>Absorção por folhas e raízes</li>
-                </ul>
-            </div>
+        st.markdown("""
+        <div class="card" onclick="selectArticle('jordao')">
+            <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
+            <p style="color:#a0a7c0;">Remoção de metais pesados e cultivo de alface</p>
+            <ul class="custom-list">
+                <li>Comparação entre doses de vermicomposto</li>
+                <li>Metais: Cobre, Níquel, Zinco</li>
+                <li>Absorção por folhas e raízes</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
-        
-        if container.button(" ", key="btn_jordao", help="Selecionar artigo de Jordão"):
-            st.session_state['selected_article'] = 'jordao'
-            st.rerun()
+    
+    # Verificar se houve seleção via JavaScript
+    if "article_selected" in st.session_state:
+        st.session_state['selected_article'] = st.session_state.article_selected
+        del st.session_state.article_selected
+        st.rerun()
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -498,7 +485,7 @@ def run_dermendzhieva_analysis():
                         </p>
                         <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
                             <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                            O parâmetro permanece estável durante o processo de vermicompostagem
+                            O parámetro permanece estável durante o processo de vermicompostagem
                         </p>
                     </div>
                 """, unsafe_allow_html=True)
@@ -1260,6 +1247,11 @@ def main():
     # Inicializar estado da sessão
     if 'selected_article' not in st.session_state:
         st.session_state['selected_article'] = None
+    
+    # Capturar seleção de artigo via JavaScript
+    if "article_selected" in st.session_state:
+        st.session_state['selected_article'] = st.session_state.article_selected
+        del st.session_state.article_selected
     
     # Roteamento
     if st.session_state['selected_article'] is None:
