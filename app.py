@@ -448,7 +448,8 @@ def run_dermendzhieva_analysis():
         
         # Grid e estilo
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        ax.legend(loc='best', fontsize=10, framealpha=0.25)
+        # Ajuste: Mudar a localização da legenda para 'lower right' para evitar sobreposição
+        ax.legend(loc='lower right', fontsize=10, framealpha=0.25) 
         
         # Remover bordas
         for spine in ax.spines.values():
@@ -478,7 +479,7 @@ def run_dermendzhieva_analysis():
         for res in results:
             param_name = res["Parâmetro"]
             p_val = res["p-value"]
-            is_significant = p_val < 0.05 # Corrected 'p极' to 'p_val'
+            is_significant = p_val < 0.05 
             
             card_class = "signif-card" if is_significant else "not-signif-card"
             icon = "✅" if is_significant else "❌"
@@ -940,7 +941,8 @@ def run_jordao_analysis():
         
         # Grid e estilo
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        ax.legend(loc='best', fontsize=10, framealpha=0.25)
+        # Ajuste: Mudar a localização da legenda para 'lower right' para evitar sobreposição
+        ax.legend(loc='lower right', fontsize=10, framealpha=0.25)
         
         # Remover bordas
         for spine in ax.spines.values():
@@ -1433,7 +1435,8 @@ def run_sharma_analysis():
         
         # Grid e estilo
         ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        ax.legend(loc='upper right', fontsize=9, framealpha=0.25)
+        # Ajuste: Mudar a localização da legenda para 'lower right' para evitar sobreposição
+        ax.legend(loc='lower right', fontsize=9, framealpha=0.25) 
         
         # Remover bordas
         for spine in ax.spines.values():
