@@ -283,67 +283,70 @@ def show_homepage():
                 st.rerun()
 
     # Novo card para o artigo de Mago et al. (2021)
-    st.markdown("""
-    <div class="card-container">
-        <div class="card">
-            <h2 style="color:#e0e5ff;">Mago et al. (2021)</h2>
-            <p style="color:#a0a7c0;">Gestão de biomassa de resíduos de cultura de banana via vermicompostagem</p>
-            <ul class="custom-list">
-                <li>Análise de parâmetros físico-químicos do vermicomposto final</li>
-                <li>Diferentes proporções de resíduos de folha de bananeira e esterco de vaca</li>
-                <li>Teste de Kruskal-Wallis</li>
-            </ul>
+    with st.container(): # Adicionado st.container()
+        st.markdown("""
+        <div class="card-container">
+            <div class="card">
+                <h2 style="color:#e0e5ff;">Mago et al. (2021)</h2>
+                <p style="color:#a0a7c0;">Gestão de biomassa de resíduos de cultura de banana via vermicompostagem</p>
+                <ul class="custom-list">
+                    <li>Análise de parâmetros físico-químicos do vermicomposto final</li>
+                    <li>Diferentes proporções de resíduos de folha de bananeira e esterco de vaca</li>
+                    <li>Teste de Kruskal-Wallis</li>
+                </ul>
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("Selecionar Mago", key="btn_mago", 
-                 help="Clique para selecionar este artigo",
-                 use_container_width=True,
-                 type="primary"):
-        st.session_state['selected_article'] = 'mago'
-        st.rerun()
+        """, unsafe_allow_html=True)
+        if st.button("Selecionar Mago", key="btn_mago", 
+                    help="Clique para selecionar este artigo",
+                    use_container_width=True,
+                    type="primary"):
+            st.session_state['selected_article'] = 'mago'
+            st.rerun()
 
     # Novo card para o artigo de Hanc et al. (2021)
-    st.markdown("""
-    <div class="card-container">
-        <div class="card">
-            <h2 style="color:#e0e5ff;">Hanc et al. (2021)</h2>
-            <p style="color:#a0a7c0;">Conversão de borra de café em vermicomposto</p>
-            <ul class="custom-list">
-                <li>Análise temporal de pH, C/N, N-NH₄⁺, N-NO₃⁻, Fósforo e Potássio</li>
-                <li>Diferentes camadas (idades) e tratamentos</li>
-                <li>Teste de Kruskal-Wallis</li>
-            </ul>
+    with st.container(): # Adicionado st.container()
+        st.markdown("""
+        <div class="card-container">
+            <div class="card">
+                <h2 style="color:#e0e5ff;">Hanc et al. (2021)</h2>
+                <p style="color:#a0a7c0;">Conversão de borra de café em vermicomposto</p>
+                <ul class="custom-list">
+                    <li>Análise temporal de pH, C/N, N-NH₄⁺, N-NO₃⁻, Fósforo e Potássio</li>
+                    <li>Diferentes camadas (idades) e tratamentos</li>
+                    <li>Teste de Kruskal-Wallis</li>
+                </ul>
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("Selecionar Hanc", key="btn_hanc",
-                 help="Clique para selecionar este artigo",
-                 use_container_width=True,
-                 type="primary"):
-        st.session_state['selected_article'] = 'hanc'
-        st.rerun()
+        """, unsafe_allow_html=True)
+        if st.button("Selecionar Hanc", key="btn_hanc",
+                    help="Clique para selecionar este artigo",
+                    use_container_width=True,
+                    type="primary"):
+            st.session_state['selected_article'] = 'hanc'
+            st.rerun()
 
     # Novo card para o artigo de Madhubala et al. (2025)
-    st.markdown("""
-    <div class="card-container">
-        <div class="card">
-            <h2 style="color:#e0e5ff;">Madhubala et al. (2025)</h2>
-            <p style="color:#a0a7c0;">Melhoria da qualidade do vermicomposto de lodo de esgoto com biocarvão e esterco</p>
-            <ul class="custom-list">
-                <li>Análise temporal de pH, Carbono Orgânico, Nitrogênio, Fósforo e Potássio</li>
-                <li>Diferentes tratamentos e espécies de minhocas</li>
-                <li>Teste de Kruskal-Wallis</li>
-            </ul>
+    with st.container(): # Adicionado st.container()
+        st.markdown("""
+        <div class="card-container">
+            <div class="card">
+                <h2 style="color:#e0e5ff;">Madhubala et al. (2025)</h2>
+                <p style="color:#a0a7c0;">Melhoria da qualidade do vermicomposto de lodo de esgoto com biocarvão e esterco</p>
+                <ul class="custom-list">
+                    <li>Análise temporal de pH, Carbono Orgânico, Nitrogênio, Fósforo e Potássio</li>
+                    <li>Diferentes tratamentos e espécies de minhocas</li>
+                    <li>Teste de Kruskal-Wallis</li>
+                </ul>
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("Selecionar Madhubala", key="btn_madhubala",
-                 help="Clique para selecionar este artigo",
-                 use_container_width=True,
-                 type="primary"):
-        st.session_state['selected_article'] = 'madhubala'
-        st.rerun()
+        """, unsafe_allow_html=True)
+        if st.button("Selecionar Madhubala", key="btn_madhubala",
+                    help="Clique para selecionar este artigo",
+                    use_container_width=True,
+                    type="primary"):
+            st.session_state['selected_article'] = 'madhubala'
+            st.rerun()
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
