@@ -205,32 +205,12 @@ def show_homepage():
     </div>
     """, unsafe_allow_html=True)
     
-    # Madhubala et al. (2025) - PRIMEIRO
-    with st.container():
-        st.markdown("""
-        <div class="card-container">
-            <div class="card">
-                <h2 style="color:#e0e5ff;">Madhubala et al. (2025)</h2>
-                <p style="color:#a0a7c0;">Melhoria da qualidade do vermicomposto de lodo de esgoto com biocarvão e esterco</p>
-                <ul class="custom-list">
-                    <li>Análise temporal de pH, Carbono Orgânico, Nitrogênio, Fósforo e Potássio</li>
-                    <li>Diferentes tratamentos e espécies de minhocas</li>
-                    <li>Teste de Kruskal-Wallis</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Selecionar Madhubala", key="btn_madhubala",
-                     help="Clique para selecionar este artigo",
-                     use_container_width=True,
-                     type="primary"):
-            st.session_state['selected_article'] = 'madhubala'
-            st.rerun()
-
+    # Madhubala et al. (2025) - Removido
+    
     col1, col2, col3 = st.columns(3) # Use colunas para os próximos 3 artigos
 
     with col1:
-        # Dermendzhieva et al. (2021) - SEGUNDO
+        # Dermendzhieva et al. (2021) - PRIMEIRO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -254,7 +234,7 @@ def show_homepage():
                 st.rerun()
     
     with col2:
-        # Mago et al. (2021) - TERCEIRO
+        # Mago et al. (2021) - SEGUNDO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -277,7 +257,7 @@ def show_homepage():
                 st.rerun()
 
     with col3:
-        # Hanc et al. (2021) - QUARTO
+        # Hanc et al. (2021) - TERCEIRO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -303,7 +283,7 @@ def show_homepage():
     col4, col5, _ = st.columns(3) # A terceira coluna está vazia para manter o alinhamento
                 
     with col4:
-        # Sharma (2019) - QUINTO
+        # Sharma (2019) - QUARTO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -327,7 +307,7 @@ def show_homepage():
                 st.rerun()
 
     with col5:
-        # Jordão et al. (2007) - SEXTO
+        # Jordão et al. (2007) - QUINTO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -2802,496 +2782,6 @@ def run_hanc_analysis():
 
 
 # ===================================================================
-# NOVO MÓDULO MADHUBALA ET AL. (2025) - ANÁLISE TEMPORAL DE PARÂMETROS FÍSICO-QUÍMICOS
-# ===================================================================
-def run_madhubala_analysis():
-    """Módulo para análise temporal de parâmetros físico-químicos (Madhubala et al., 2025)"""
-
-    # Mapeamento de parâmetros para exibição na UI
-    PARAM_MAPPING = {
-        "pH": "pH",
-        "Total organic carbon %": "Carbono Orgânico Total (%)",
-        "Total nitrogen %": "Nitrogênio Total (%)",
-        "Extractable phosphorus %": "Fósforo Extraível (%)",
-        "Total potassium %": "Potássio Total (%)",
-        "C/N ratio": "Razão C/N",
-    }
-
-    # Dados do artigo Madhubala et al. (2025) - Tabela 3
-    MADHUBALA_DATA = {
-        # Format: Parameter: {Treatment: {Time_Point: (mean, stdev)}}
-        "pH": {
-            "CM0": {"Initial": (6.81, 0.09), "E. eugeniae (7 weeks)": (6.04, 0.10), "E. fetida (7 weeks)": (6.12, 0.14)},
-            "CM25": {"Initial": (6.86, 0.11), "E. eugeniae (7 weeks)": (6.20, 0.21), "E. fetida (7 weeks)": (6.13, 0.20)},
-            "CM50": {"Initial": (6.90, 0.16), "E. eugeniae (7 weeks)": (6.22, 0.12), "E. fetida (7 weeks)": (6.01, 0.19)},
-            "BCM0": {"Initial": (7.02, 0.09), "E. eugeniae (7 weeks)": (6.25, 0.27), "E. fetida (7 weeks)": (6.08, 0.22)},
-            "BCM25": {"Initial": (7.03, 0.13), "E. eugeniae (7 weeks)": (6.35, 0.07), "E. fetida (7 weeks)": (6.19, 0.08)},
-            "BCM50": {"Initial": (7.03, 0.08), "E. eugeniae (7 weeks)": (6.03, 0.13), "E. fetida (7 weeks)": (6.10, 0.25)},
-            # SS_ct (Composting only) is omitted from multi-species comparison for clarity
-        },
-        "Total organic carbon %": {
-            "CM0": {"Initial": (28.84, 1.14), "E. eugeniae (7 weeks)": (21.05, 1.05), "E. fetida (7 weeks)": (21.34, 1.07)},
-            "CM25": {"Initial": (33.94, 1.69), "E. eugeniae (7 weeks)": (23.07, 1.15), "E. fetida (7 weeks)": (22.40, 1.12)},
-            "CM50": {"Initial": (34.94, 1.75), "E. eugeniae (7 weeks)": (25.33, 1.27), "E. fetida (7 weeks)": (24.52, 1.23)},
-            "BCM0": {"Initial": (38.00, 1.90), "E. eugeniae (7 weeks)": (24.70, 1.24), "E. fetida (7 weeks)": (23.94, 1.20)},
-            "BCM25": {"Initial": (39.53, 1.97), "E. eugeniae (7 weeks)": (24.11, 1.20), "E. fetida (7 weeks)": (23.48, 1.17)},
-            "BCM50": {"Initial": (41.06, 2.05), "E. eugeniae (7 weeks)": (22.58, 1.13), "E. fetida (7 weeks)": (23.11, 1.15)},
-        },
-        "Total nitrogen %": {
-            "CM0": {"Initial": (1.89, 0.05), "E. eugeniae (7 weeks)": (2.56, 0.05), "E. fetida (7 weeks)": (2.55, 0.04)},
-            "CM25": {"Initial": (1.58, 0.05), "E. eugeniae (7 weeks)": (2.58, 0.03), "E. fetida (7 weeks)": (2.61, 0.05)},
-            "CM50": {"Initial": (1.77, 0.06), "E. eugeniae (7 weeks)": (2.53, 0.03), "E. fetida (7 weeks)": (2.56, 0.06)},
-            "BCM0": {"Initial": (1.58, 0.07), "E. eugeniae (7 weeks)": (2.63, 0.04), "E. fetida (7 weeks)": (2.60, 0.05)},
-            "BCM25": {"Initial": (1.48, 0.08), "E. eugeniae (7 weeks)": (2.67, 0.03), "E. fetida (7 weeks)": (2.65, 0.05)},
-            "BCM50": {"Initial": (1.40, 0.05), "E. eugeniae (7 weeks)": (2.57, 0.05), "E. fetida (7 weeks)": (2.59, 0.06)},
-        },
-        "C/N ratio": {
-            "CM0": {"Initial": (15.24, 0.79), "E. eugeniae (7 weeks)": (9.02, 0.27), "E. fetida (7 weeks)": (8.15, 0.35)},
-            "CM25": {"Initial": (21.49, 1.17), "E. eugeniae (7 weeks)": (8.36, 0.38), "E. fetida (7 weeks)": (8.59, 0.34)},
-            "CM50": {"Initial": (19.73, 1.51), "E. eugeniae (7 weeks)": (10.0, 0.47), "E. fetida (7 weeks)": (9.58, 0.41)},
-            "BCM0": {"Initial": (24.11, 0.96), "E. eugeniae (7 weeks)": (9.39, 0.61), "E. fetida (7 weeks)": (9.22, 0.64)},
-            "BCM25": {"Initial": (26.72, 2.30), "E. eugeniae (7 weeks)": (9.03, 0.53), "E. fetida (7 weeks)": (8.87, 0.54)},
-            "BCM50": {"Initial": (29.31, 2.28), "E. eugeniae (7 weeks)": (8.79, 0.55), "E. fetida (7 weeks)": (8.94, 0.44)},
-        },
-        "Extractable phosphorus %": {
-            "CM0": {"Initial": (1.44, 0.12), "E. eugeniae (7 weeks)": (1.90, 0.12), "E. fetida (7 weeks)": (1.93, 0.09)},
-            "CM25": {"Initial": (1.40, 0.07), "E. eugeniae (7 weeks)": (2.16, 0.09), "E. fetida (7 weeks)": (2.15, 0.10)},
-            "CM50": {"Initial": (1.35, 0.06), "E. eugeniae (7 weeks)": (2.14, 0.11), "E. fetida (7 weeks)": (2.10, 0.10)},
-            "BCM0": {"Initial": (1.25, 0.06), "E. eugeniae (7 weeks)": (1.97, 0.11), "E. fetida (7 weeks)": (2.00, 0.08)},
-            "BCM25": {"Initial": (1.39, 0.09), "E. eugeniae (7 weeks)": (1.95, 0.12), "E. fetida (7 weeks)": (2.00, 0.09)},
-            "BCM50": {"Initial": (1.40, 0.12), "E. eugeniae (7 weeks)": (1.95, 0.11), "E. fetida (7 weeks)": (1.99, 0.12)},
-        },
-        "Total potassium %": {
-            "CM0": {"Initial": (0.25, 0.02), "E. eugeniae (7 weeks)": (0.34, 0.02), "E. fetida (7 weeks)": (0.35, 0.01)},
-            "CM25": {"Initial": (0.21, 0.01), "E. eugeniae (7 weeks)": (0.31, 0.04), "E. fetida (7 weeks)": (0.32, 0.02)},
-            "CM50": {"Initial": (0.28, 0.02), "E. eugeniae (7 weeks)": (0.42, 0.03), "E. fetida (7 weeks)": (0.42, 0.02)},
-            "BCM0": {"Initial": (0.20, 0.01), "E. eugeniae (7 weeks)": (0.31, 0.04), "E. fetida (7 weeks)": (0.32, 0.03)},
-            "BCM25": {"Initial": (0.24, 0.01), "E. eugeniae (7 weeks)": (0.36, 0.02), "E. fetida (7 weeks)": (0.38, 0.03)},
-            "BCM50": {"Initial": (0.28, 0.02), "E. eugeniae (7 weeks)": (0.38, 0.04), "E. fetida (7 weeks)": (0.39, 0.03)},
-        },
-    }
-
-    # Descrições dos tratamentos
-    TREATMENT_DESCRIPTIONS_MADHUBALA = {
-        "CM0": "Lodo de Esgoto (Controle)",
-        "CM25": "Lodo de Esgoto + 25% Esterco de Vaca",
-        "CM50": "Lodo de Esgoto + 50% Esterco de Vaca",
-        "BCM0": "Lodo de Esgoto + Biocarvão",
-        "BCM25": "Lodo de Esgoto + 25% Esterco de Vaca + Biocarvão",
-        "BCM50": "Lodo de Esgoto + 50% Esterco de Vaca + Biocarvão",
-    }
-    
-    # Mapeamento de pontos no tempo para Kruskal-Wallis
-    TIME_POINTS_MAPPING = {
-        "Initial": 0,
-        "E. eugeniae (7 weeks)": 7,
-        "E. fetida (7 weeks)": 7
-    }
-
-
-    @st.cache_data
-    def load_madhubala_data(num_replications=3):
-        all_data = []
-        for param_name, treatments_data in MADHUBALA_DATA.items():
-            for treatment_name, time_points_data in treatments_data.items():
-                for time_point_name, (mean, stdev) in time_points_data.items():
-                    for _ in range(num_replications):
-                        sim_stdev = stdev if stdev is not None else (mean * 0.05 if mean != 0 else 0.01) # Estimativa se SD é None
-                        value = np.random.normal(mean, sim_stdev)
-                        
-                        # Garantir valores fisicamente possíveis (não-negativos, pH entre 0-14)
-                        if param_name == "pH":
-                            value = np.clip(value, 0, 14)
-                        else:
-                            value = max(0.0, value)
-                        
-                        all_data.append({
-                            "Parameter": param_name,
-                            "Treatment": treatment_name,
-                            "Time_Point": time_point_name,
-                            "Value": value
-                        })
-        return pd.DataFrame(all_data)
-
-    def plot_madhubala_parameter_evolution(ax, data_by_time_point, time_points_ordered, param_name, treatment_name):
-        numeric_time_points = [TIME_POINTS_MAPPING[tp] for tp in time_points_ordered]
-        
-        # Cores para Initial, E. eugeniae, E. fetida
-        colors = ['#a0a7c0', '#6f42c1', '#00c1e0'] # Cinza para Initial, Roxo para E.eugeniae, Azul para E.fetida
-
-        for i, (time_point, num_time_point) in enumerate(zip(time_points_ordered, numeric_time_points)):
-            group_data = data_by_time_point[i]
-            
-            ax.scatter(
-                [num_time_point] * len(group_data), 
-                group_data, 
-                alpha=0.85, 
-                s=100,
-                color=colors[i],
-                edgecolors='white',
-                linewidth=1.2,
-                zorder=3,
-                label=f"{time_point}",
-                marker='o'
-            )
-        
-        # Calcular e plotar medianas com estilo premium
-        medians = [np.median(group) for group in data_by_time_point]
-        ax.plot(
-            numeric_time_points, 
-            medians, 
-            'D-', 
-            markersize=10,
-            linewidth=3,
-            color='#ffffff', # Linha branca para as medianas
-            markerfacecolor='#6f42c1', # Marcador com uma cor padrão mais forte
-            markeredgecolor='white',
-            markeredgewidth=1.5,
-            zorder=5,
-            alpha=0.95
-        )
-        
-        ax.set_xticks(sorted(list(set(numeric_time_points)))) # Remove duplicatas para x-ticks
-        ax.set_xticklabels([f"Inicial" if x == 0 else f"{x} semanas" for x in sorted(list(set(numeric_time_points)))], fontsize=11)
-        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-        
-        ax.set_xlabel("Ponto no Tempo", fontsize=12, fontweight='bold', labelpad=15)
-        ax.set_ylabel(PARAM_MAPPING.get(param_name, param_name), fontsize=12, fontweight='bold', labelpad=15)
-        ax.set_title(f"Evolução de {PARAM_MAPPING.get(param_name, param_name)} para {TREATMENT_DESCRIPTIONS_MADHUBALA[treatment_name]}", 
-                     fontsize=14, fontweight='bold', pad=20)
-        
-        ax.grid(True, alpha=0.2, linestyle='--', color='#a0a7c0', zorder=1)
-        ax.legend(loc='lower right', fontsize=9, framealpha=0.25) 
-        
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-        
-        ax.set_facecolor('#0c0f1d')
-        
-        return ax
-
-    def display_madhubala_interpretation(results):
-        st.markdown("""
-        <div class="card">
-            <h2 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📝 Interpretação dos Resultados - Madhubala et al. (2025)
-                </span>
-            </h2>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        if not results:
-            st.info("Nenhuma interpretação disponível, pois não há resultados estatísticos.")
-            return
-        
-        for res in results:
-            param_name = res["Parâmetro"]
-            treatment_name = res["Tratamento"]
-            p_val = res["p-value"]
-            is_significant = p_val < 0.05
-            
-            card_class = "signif-card" if is_significant else "not-signif-card"
-            icon = "✅" if is_significant else "❌"
-            title_color = "#00c853" if is_significant else "#ff5252"
-            status = "Significativo" if is_significant else "Não Significativo"
-            
-            st.markdown(f"""
-            <div class="result-card {card_class}">
-                <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="font-size:28px; color:{title_color};">{icon}</div>
-                        <h3 style="margin:0; color:{title_color}; font-weight:600;">{param_name} ({TREATMENT_DESCRIPTIONS_MADHUBALA[treatment_name]})</h3>
-                    </div>
-                    <div style="background:rgba(42, 47, 69, 0.7); padding:8px 18px; border-radius:30px; border:1px solid {title_color}30;">
-                        <span style="font-weight:bold; font-size:1.1rem; color:{title_color};">{status}</span>
-                        <span style="color:#a0a7c0; margin-left:8px;">p = {p_val:.4f}</span>
-                    </div>
-                </div>
-                <div style="margin-top:20px; padding-top:15px; border-top:1px solid rgba(100, 110, 200, 0.2);">
-            """, unsafe_allow_html=True)
-            
-            if is_significant:
-                st.markdown(f"""
-                <div style="color:#e0e5ff; line-height:1.8;">
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        <b>Rejeitamos a hipótese nula (H₀).</b>
-                    </p>
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        Há evidências de que os valores do parâmetro {param_name} mudam significativamente ao longo do tempo neste tratamento.
-                    </p>
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#00c853; font-size:1.5rem;">•</span>
-                        Isso indica que a vermicompostagem (com as espécies E. eugeniae ou E. fetida) e os aditivos são eficazes em alterar este parâmetro.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div style="color:#e0e5ff; line-height:1.8;">
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        <b>Aceitamos a hipótese nula (H₀).</b>
-                    </p>
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        Não há evidências suficientes de mudanças significativas nos valores do parâmetro {param_name} ao longo do tempo neste tratamento.
-                    </p>
-                    <p style="margin:12px 0; display:flex; align-items:center; gap:8px;">
-                        <span style="color:#ff5252; font-size:1.5rem;">•</span>
-                        Isso sugere que o parâmetro se manteve relativamente estável para esta formulação durante o processo de vermicompostagem.
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            st.markdown("</div></div>", unsafe_allow_html=True)
-
-    # Interface principal do módulo Madhubala et al. (2025)
-    st.markdown("""
-    <div class="header-card">
-        <h1 style="margin:0;padding:0;background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem;">
-            🌱 Análise Temporal de Parâmetros Físico-Químicos (Lodo de Esgoto)
-        </h1>
-        <p style="margin:0;padding-top:10px;color:#a0a7c0;font-size:1.1rem;">
-        Madhubala et al. (2025) - Lodo de esgoto, biocarvão e esterco bovino
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button("← Voltar para seleção de artigos"):
-        del st.session_state['selected_article']
-        st.rerun()
-
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                ⚙️ Configurações de Análise
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.write("Os dados são carregados e simulados a partir da Tabela 3 do artigo.")
-    
-    with col2:
-        param_options = list(PARAM_MAPPING.values())
-        selected_params = st.multiselect(
-            "Selecione os parâmetros para análise:",
-            options=param_options,
-            default=param_options[:3], # Seleciona pH, TOC, TN por padrão
-            key="madhubala_param_select"
-        )
-    
-    df_madhubala = load_madhubala_data()
-
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                🔍 Pré-visualização dos Dados (Simulados)
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.dataframe(df_madhubala)
-    st.markdown(f"**Total de amostras simuladas:** {len(df_madhubala)}")
-
-    st.markdown("""
-    <div class="info-card">
-        <h3 style="display:flex;align-items:center;color:#00c1e0;">
-            <span class="info-icon">ℹ️</span> Metodologia de Análise
-        </h3>
-        <div style="margin-top:15px; color:#d7dce8; line-height:1.7;">
-            <p>
-                Os dados para esta análise foram extraídos da <b>Tabela 3</b> do artigo de Madhubala et al. (2025). 
-                Para permitir a análise estatística, foram simuladas <b>3 réplicas</b> para cada valor médio de parâmetro, 
-                tratamento e ponto no tempo, utilizando uma distribuição normal com base nos desvios padrão fornecidos.
-            </p>
-            <p>
-                <b>Pontos no Tempo Analisados:</b>
-                <ul>
-                    <li><b>Inicial:</b> Antes da vermicompostagem.</li>
-                    <li><b>7 semanas (E. eugeniae):</b> Após 7 semanas de vermicompostagem com <i>Eudrilus eugeniae</i>.</li>
-                    <li><b>7 semanas (E. fetida):</b> Após 7 semanas de vermicompostagem com <i>Eisenia fetida</i>.</li>
-                </ul>
-            </p>
-            <p>
-                <b>Tratamentos Analisados:</b>
-                <ul>
-                    <li><b>CM0:</b> Lodo de Esgoto (Controle)</li>
-                    <li><b>CM25:</b> Lodo de Esgoto + 25% Esterco de Vaca</li>
-                    <li><b>CM50:</b> Lodo de Esgoto + 50% Esterco de Vaca</li>
-                    <li><b>BCM0:</b> Lodo de Esgoto + Biocarvão (10%)</li>
-                    <li><b>BCM25:</b> Lodo de Esgoto + 25% Esterco de Vaca + Biocarvão (10%)</li>
-                    <li><b>BCM50:</b> Lodo de Esgoto + 50% Esterco de Vaca + Biocarvão (10%)</li>
-                </ul>
-            </p>
-            <p>
-                Para cada parâmetro selecionado, o teste de Kruskal-Wallis foi aplicado para verificar 
-                se existem diferenças significativas nos valores ao longo do tempo (entre os pontos "Inicial", 
-                "E. eugeniae (7 semanas)" e "E. fetida (7 semanas)") para cada tratamento individualmente.
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.divider()
-
-    # Realizar Análise
-    if not selected_params:
-        st.warning("Selecione pelo menos um parâmetro para análise.")
-        return
-
-    reverse_mapping = {v: k for k, v in PARAM_MAPPING.items()}
-    selected_original_params = [reverse_mapping[p] for p in selected_params]
-    
-    results = []
-    time_points_ordered = list(TIME_POINTS_MAPPING.keys())
-    treatments_to_analyze = list(TREATMENT_DESCRIPTIONS_MADHUBALA.keys())
-
-    for treatment in treatments_to_analyze:
-        st.markdown(f"""
-        <div class="card">
-            <h2 style="display:flex;align-items:center;gap:10px;">
-                <span style="background:linear-gradient(135deg, #00c1e0 0%, #00d4b1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                    📈 Evolução dos Parâmetros para {TREATMENT_DESCRIPTIONS_MADHUBALA[treatment]}
-                </span>
-            </h2>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        fig, axes = plt.subplots(len(selected_original_params), 1, figsize=(10, 6 * len(selected_original_params)))
-        if len(selected_original_params) == 1:
-            axes = [axes] 
-        
-        for i, param in enumerate(selected_original_params):
-            param_df_by_treatment = df_madhubala[(df_madhubala['Parameter'] == param) & (df_madhubala['Treatment'] == treatment)]
-            
-            data_by_time_point = []
-            for time_point in time_points_ordered:
-                time_point_data = param_df_by_treatment[param_df_by_treatment['Time_Point'] == time_point]['Value'].dropna().values
-                if len(time_point_data) > 0:
-                    data_by_time_point.append(time_point_data)
-                else:
-                    data_by_time_point.append(np.array([]))
-
-            valid_data_for_kruskal = [d for d in data_by_time_point if len(d) > 0]
-            
-            if len(valid_data_for_kruskal) >= 2:
-                try:
-                    h_stat, p_val = kruskal(*valid_data_for_kruskal)
-                    results.append({
-                        "Parâmetro": PARAM_MAPPING[param],
-                        "Tratamento": treatment,
-                        "H-Statistic": h_stat,
-                        "p-value": p_val,
-                        "Significativo (p<0.05)": p_val < 0.05
-                    })
-                    
-                    ax = axes[i]
-                    plot_madhubala_parameter_evolution(ax, data_by_time_point, time_points_ordered, param, treatment)
-                    
-                    annotation_text = f"Kruskal-Wallis: H = {h_stat:.2f}, p = {p_val:.4f}"
-                    ax.text(
-                        0.5, 0.95, 
-                        annotation_text,
-                        transform=ax.transAxes,
-                        ha='center',
-                        va='top',
-                        fontsize=11,
-                        color='white',
-                        bbox=dict(
-                            boxstyle="round,pad=0.3",
-                            facecolor='#2a2f45',
-                            alpha=0.8,
-                            edgecolor='none'
-                        )
-                    )
-                except Exception as e:
-                    st.error(f"Erro ao processar {param} para {treatment}: {str(e)}")
-                    continue
-            else:
-                st.warning(f"Dados insuficientes para {PARAM_MAPPING.get(param, param)} para o tratamento {TREATMENT_DESCRIPTIONS_MADHUBALA[treatment]} para realizar o teste de Kruskal-Wallis.")
-                ax = axes[i]
-                plot_madhubala_parameter_evolution(ax, data_by_time_point, time_points_ordered, param, treatment)
-
-        plt.tight_layout(h_pad=0.6)
-        st.pyplot(fig)
-        plt.close(fig)
-        st.markdown('<div class="graph-spacer"></div>', unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                📊 Resultados Estatísticos Consolidado
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if results:
-        results_df = pd.DataFrame(results)
-        results_df['Significância'] = results_df['p-value'].apply(
-            lambda p: "✅ Sim" if p < 0.05 else "❌ Não"
-        )
-        
-        results_df['Tratamento'] = results_df['Tratamento'].map(TREATMENT_DESCRIPTIONS_MADHUBALA)
-
-        results_df = results_df[['Parâmetro', 'Tratamento', 'H-Statistic', 'p-value', 'Significância']]
-        
-        st.dataframe(
-            results_df.style
-            .format({"p-value": "{:.4f}", "H-Statistic": "{:.2f}"})
-            .set_properties(**{
-                'color': 'white',
-                'background-color': '#131625',
-            })
-            .apply(lambda x: ['background: rgba(70, 80, 150, 0.3)' 
-                               if x['Significância'] == "✅ Sim" else '' for i in x], axis=1)
-        )
-    else:
-        st.info("Nenhum resultado estatístico disponível.")
-    
-    display_madhubala_interpretation(results)
-
-    st.markdown("""
-    <div class="card">
-        <h2 style="display:flex;align-items:center;gap:10px;">
-            <span style="background:linear-gradient(135deg, #a78bfa 0%, #6f42c1 100%);padding:5px 15px;border-radius:30px;font-size:1.2rem;">
-                📚 Referência Bibliográfica
-            </span>
-        </h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="reference-card">
-        <p style="line-height:1.8; text-align:justify;">
-            MADHUBALA, S.; PRAVINKUMAR, P.; KARTHIKEYAN, K.; KARMEGAM, N.; HUSSAIN, N. 
-            Neem biochar and cow manure as additives enhanced earthworm productivity and vermicompost quality during sewage sludge vermicomposting. 
-            <strong>Journal of Environmental Management</strong>, 
-            v. 387, p. 125870, 2025.
-        </p>
-        <p style="margin-top:10px;">
-            <strong>DOI:</strong> 10.1016/j.jenvman.2025.125870
-        </p>
-        <p style="margin-top:15px; font-style:italic;">
-            Nota: Os dados utilizados nesta análise são baseados na Tabela 3 do estudo supracitado. 
-            Para mais detalhes metodológicos e resultados completos, consulte o artigo original.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ===================================================================
 # ROTEADOR PRINCIPAL
 # ===================================================================
 def main():
@@ -3310,10 +2800,10 @@ def main():
         run_sharma_analysis()
     elif st.session_state['selected_article'] == 'mago':
         run_mago_analysis()
-    elif st.session_state['selected_article'] == 'hanc': # Novo roteamento para Hanc
+    elif st.session_state['selected_article'] == 'hanc': # Roteamento para Hanc
         run_hanc_analysis()
-    elif st.session_state['selected_article'] == 'madhubala': # Novo roteamento para Madhubala
-        run_madhubala_analysis()
+    # Módulo Madhubala et al. (2025) removido do roteamento
+
 
 if __name__ == "__main__":
     main()
