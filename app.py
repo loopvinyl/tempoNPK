@@ -205,10 +205,32 @@ def show_homepage():
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
-    
+    # Madhubala et al. (2025) - PRIMEIRO
+    with st.container():
+        st.markdown("""
+        <div class="card-container">
+            <div class="card">
+                <h2 style="color:#e0e5ff;">Madhubala et al. (2025)</h2>
+                <p style="color:#a0a7c0;">Melhoria da qualidade do vermicomposto de lodo de esgoto com biocarvão e esterco</p>
+                <ul class="custom-list">
+                    <li>Análise temporal de pH, Carbono Orgânico, Nitrogênio, Fósforo e Potássio</li>
+                    <li>Diferentes tratamentos e espécies de minhocas</li>
+                    <li>Teste de Kruskal-Wallis</li>
+                </ul>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Selecionar Madhubala", key="btn_madhubala",
+                     help="Clique para selecionar este artigo",
+                     use_container_width=True,
+                     type="primary"):
+            st.session_state['selected_article'] = 'madhubala'
+            st.rerun()
+
+    col1, col2, col3 = st.columns(3) # Use colunas para os próximos 3 artigos
+
     with col1:
-        # Container para o card clicável
+        # Dermendzhieva et al. (2021) - SEGUNDO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -224,7 +246,6 @@ def show_homepage():
             </div>
             """, unsafe_allow_html=True)
             
-            # Botão invisível que cobre todo o card
             if st.button("Selecionar Dermendzhieva", key="btn_dermendzhieva", 
                          help="Clique para selecionar este artigo",
                          use_container_width=True,
@@ -233,32 +254,56 @@ def show_homepage():
                 st.rerun()
     
     with col2:
-        # Container para o card clicável
+        # Mago et al. (2021) - TERCEIRO
         with st.container():
             st.markdown("""
             <div class="card-container">
                 <div class="card">
-                    <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
-                    <p style="color:#a0a7c0;">Remoção de metais pesados e cultivo de alface</p>
+                    <h2 style="color:#e0e5ff;">Mago et al. (2021)</h2>
+                    <p style="color:#a0a7c0;">Gestão de biomassa de resíduos de cultura de banana via vermicompostagem</p>
                     <ul class="custom-list">
-                        <li>Comparação entre doses de vermicomposto</li>
-                        <li>Metais: Cobre, Níquel, Zinco</li>
-                        <li>Absorção por folhas e raízes</li>
+                        <li>Análise de parâmetros físico-químicos do vermicomposto final</li>
+                        <li>Diferentes proporções de resíduos de folha de bananeira e esterco de vaca</li>
+                        <li>Teste de Kruskal-Wallis</li>
                     </ul>
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            
-            # Botão invisível que cobre todo o card
-            if st.button("Selecionar Jordão", key="btn_jordao", 
-                         help="Clique para selecionar este artigo",
-                         use_container_width=True,
-                         type="primary"):
-                st.session_state['selected_article'] = 'jordao'
+            if st.button("Selecionar Mago", key="btn_mago", 
+                        help="Clique para selecionar este artigo",
+                        use_container_width=True,
+                        type="primary"):
+                st.session_state['selected_article'] = 'mago'
                 st.rerun()
-                
+
     with col3:
-        # Container para o card clicável
+        # Hanc et al. (2021) - QUARTO
+        with st.container():
+            st.markdown("""
+            <div class="card-container">
+                <div class="card">
+                    <h2 style="color:#e0e5ff;">Hanc et al. (2021)</h2>
+                    <p style="color:#a0a7c0;">Conversão de borra de café em vermicomposto</p>
+                    <ul class="custom-list">
+                        <li>Análise temporal de pH, C/N, N-NH₄⁺, N-NO₃⁻, Fósforo e Potássio</li>
+                        <li>Diferentes camadas (idades) e tratamentos</li>
+                        <li>Teste de Kruskal-Wallis</li>
+                    </ul>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Selecionar Hanc", key="btn_hanc",
+                        help="Clique para selecionar este artigo",
+                        use_container_width=True,
+                        type="primary"):
+                st.session_state['selected_article'] = 'hanc'
+                st.rerun()
+
+    # Próximos dois artigos em uma nova linha
+    col4, col5, _ = st.columns(3) # A terceira coluna está vazia para manter o alinhamento
+                
+    with col4:
+        # Sharma (2019) - QUINTO
         with st.container():
             st.markdown("""
             <div class="card-container">
@@ -274,7 +319,6 @@ def show_homepage():
             </div>
             """, unsafe_allow_html=True)
             
-            # Botão invisível que cobre todo o card
             if st.button("Selecionar Sharma", key="btn_sharma", 
                          help="Clique para selecionar este artigo",
                          use_container_width=True,
@@ -282,71 +326,29 @@ def show_homepage():
                 st.session_state['selected_article'] = 'sharma'
                 st.rerun()
 
-    # Novo card para o artigo de Mago et al. (2021)
-    with st.container(): # Adicionado st.container()
-        st.markdown("""
-        <div class="card-container">
-            <div class="card">
-                <h2 style="color:#e0e5ff;">Mago et al. (2021)</h2>
-                <p style="color:#a0a7c0;">Gestão de biomassa de resíduos de cultura de banana via vermicompostagem</p>
-                <ul class="custom-list">
-                    <li>Análise de parâmetros físico-químicos do vermicomposto final</li>
-                    <li>Diferentes proporções de resíduos de folha de bananeira e esterco de vaca</li>
-                    <li>Teste de Kruskal-Wallis</li>
-                </ul>
+    with col5:
+        # Jordão et al. (2007) - SEXTO
+        with st.container():
+            st.markdown("""
+            <div class="card-container">
+                <div class="card">
+                    <h2 style="color:#e0e5ff;">Jordão et al. (2007)</h2>
+                    <p style="color:#a0a7c0;">Remoção de metais pesados e cultivo de alface</p>
+                    <ul class="custom-list">
+                        <li>Comparação entre doses de vermicomposto</li>
+                        <li>Metais: Cobre, Níquel, Zinco</li>
+                        <li>Absorção por folhas e raízes</li>
+                    </ul>
+                </div>
             </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Selecionar Mago", key="btn_mago", 
-                    help="Clique para selecionar este artigo",
-                    use_container_width=True,
-                    type="primary"):
-            st.session_state['selected_article'] = 'mago'
-            st.rerun()
-
-    # Novo card para o artigo de Hanc et al. (2021)
-    with st.container(): # Adicionado st.container()
-        st.markdown("""
-        <div class="card-container">
-            <div class="card">
-                <h2 style="color:#e0e5ff;">Hanc et al. (2021)</h2>
-                <p style="color:#a0a7c0;">Conversão de borra de café em vermicomposto</p>
-                <ul class="custom-list">
-                    <li>Análise temporal de pH, C/N, N-NH₄⁺, N-NO₃⁻, Fósforo e Potássio</li>
-                    <li>Diferentes camadas (idades) e tratamentos</li>
-                    <li>Teste de Kruskal-Wallis</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Selecionar Hanc", key="btn_hanc",
-                    help="Clique para selecionar este artigo",
-                    use_container_width=True,
-                    type="primary"):
-            st.session_state['selected_article'] = 'hanc'
-            st.rerun()
-
-    # Novo card para o artigo de Madhubala et al. (2025)
-    with st.container(): # Adicionado st.container()
-        st.markdown("""
-        <div class="card-container">
-            <div class="card">
-                <h2 style="color:#e0e5ff;">Madhubala et al. (2025)</h2>
-                <p style="color:#a0a7c0;">Melhoria da qualidade do vermicomposto de lodo de esgoto com biocarvão e esterco</p>
-                <ul class="custom-list">
-                    <li>Análise temporal de pH, Carbono Orgânico, Nitrogênio, Fósforo e Potássio</li>
-                    <li>Diferentes tratamentos e espécies de minhocas</li>
-                    <li>Teste de Kruskal-Wallis</li>
-                </ul>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Selecionar Madhubala", key="btn_madhubala",
-                    help="Clique para selecionar este artigo",
-                    use_container_width=True,
-                    type="primary"):
-            st.session_state['selected_article'] = 'madhubala'
-            st.rerun()
+            """, unsafe_allow_html=True)
+            
+            if st.button("Selecionar Jordão", key="btn_jordao", 
+                         help="Clique para selecionar este artigo",
+                         use_container_width=True,
+                         type="primary"):
+                st.session_state['selected_article'] = 'jordao'
+                st.rerun()
 
 # ===================================================================
 # MÓDULO DERMENDZHIEVA ET AL. (2021) - ANÁLISE TEMPORAL
@@ -2789,7 +2791,7 @@ def run_hanc_analysis():
             v. 341, p. 125925, 2021.
         </p>
         <p style="margin-top:10px;">
-            <strong>DOI:</strong> 10.1016/j.biortech.2021.125925
+            <strong>DOI:</strong> 1.1016/j.biortech.2021.125925
         </p>
         <p style="margin-top:15px; font-style:italic;">
             Nota: Os dados de Fósforo e Potássio foram estimados visualmente da Figura 3. 
